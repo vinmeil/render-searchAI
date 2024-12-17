@@ -1,8 +1,24 @@
 {
+  "version": 2,
   "builds": [
-    { "src": "app.py", "use": "@vercel/python" }
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": {
+        "excludeFiles": "**/__pycache__/**, *.log, *.db, *.sqlite3, *.csv, *.tar.gz, *.zip"
+      }
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "app.py" }
-  ]
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
+  "functions": {
+    "api/*": {
+      "includeFiles": ["static/**/*", "templates/**/*"],
+      "excludeFiles": ["**/__pycache__/**", "*.log", "*.db", "*.sqlite3", "runtime.txt"]
+    }
+  }
 }
