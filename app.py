@@ -1,4 +1,3 @@
-import os
 import json
 import agentql
 import asyncio
@@ -11,7 +10,14 @@ from flask import Flask, render_template, request
 # Load environment variables
 load_dotenv()
 
+# memoization cache to store the results of the previous queries
+# will improve on this later
+cache = {}
+
 async def scrape_carousell_products(keywords):
+    if keywords in cache:
+        return cache[keywords]
+
     URL = f"https://www.carousell.com.my/search/{keywords}"
     OUTPUT_FILE = "carousell_products.json"
 
@@ -69,6 +75,9 @@ async def scrape_carousell_products(keywords):
 
         print(f"Total {len(all_products)} products scraped. Data saved to {OUTPUT_FILE}")
         await browser.close()
+
+    # tryna cache to avoid scraping again
+    cache[keywords] = all_products
     return all_products
 
 # Function to extract relevant keywords using LangChain
