@@ -1,4 +1,6 @@
-Flask==2.1.1
-langchain==0.0.173
-langchain_ollama==0.0.2
-playwright==1.18.0
+flask
+gunicorn
+langchain
+langchain_ollama==0.1.1
+python-dotenv
+playwright
