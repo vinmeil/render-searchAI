@@ -14,11 +14,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "functions": {
-    "api/*": {
-      "includeFiles": ["static/**/*", "templates/**/*"],
-      "excludeFiles": ["**/__pycache__/**", "*.log", "*.db", "*.sqlite3", "runtime.txt"]
-    }
-  }
+  ]
 }
