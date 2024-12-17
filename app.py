@@ -72,6 +72,7 @@ async def scrape_carousell_products(keywords):
     return all_products
 
 # Function to extract relevant keywords using LangChain
+#If there are multiple keywords, connect them via a comma (e.g. 'zzz account').
 def keyword_extractor(query):
     llm = ChatOllama(
         model="llama3.1",
@@ -87,7 +88,7 @@ def keyword_extractor(query):
                 1. Do not ask questions.
                 2. Do not output a list.
                 3. Output only a few words (keywords).
-                4. If there are multiple keywords, connect them via a comma (e.g. 'zzz account').
+                4. If there are multiple keywords, only get the first one spaced correctly
                 5. If user query does not include any product reply with "I am sorry I couldn't find '[user's full query]'"
                 """,
             ),
