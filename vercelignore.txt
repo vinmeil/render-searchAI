@@ -1,0 +1,42 @@
+# Ignore Python virtual environments
+venv/
+__pycache__/
+*.pyc
+
+# Ignore local environment files
+.env
+.env.local
+
+# Ignore git and version control metadata
+.git/
+.gitignore
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Ignore tests and development tools
+tests/
+docs/
+examples/
+runtime.txt
+
+# Ignore IDE and editor-specific files
+.vscode/
+.idea/
+*.iml
+
+# Ignore unnecessary static files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Ignore build artifacts
+*.zip
+*.tar.gz
+*.egg-info/
+dist/
+build/
+__pycache__/
