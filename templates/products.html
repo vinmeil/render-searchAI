@@ -101,11 +101,9 @@
             <div class="product-card">
                 <!-- Image with error handling for .jpg logic -->
                 <img src="{{ product.img_link }}" 
-                     alt="Product Image"
-                     onerror="handleImageError(this)">
+                     alt="Product Image">
                 <h2>{{ product.name }}</h2>
                 <p><strong>Price:</strong> RM {{ product.price }}</p>
-                <p><strong>Condition:</strong> {{ product.condition }}</p>
                 <a href="{{ product.product_link }}" target="_blank">
                     <button>View Product</button>
                 </a>
@@ -113,22 +111,5 @@
             {% endfor %}
         </div>
     </div>
-
-    <script>
-        function handleImageError(img) {
-            const originalSrc = img.src;
-            // Check if ".jpg" exists
-            if (originalSrc.includes('.jpg')) {
-                // Remove .jpg and retry
-                img.src = originalSrc.replace('.jpg', '');
-            } else {
-                // Add .jpg and retry
-                img.src = originalSrc + '.jpg';
-            }
-
-            // Remove the onerror to prevent infinite loops if the image still fails
-            img.onerror = null;
-        }
-    </script>
 </body>
 </html>

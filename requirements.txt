@@ -1,9 +1,4 @@
 flask
 gunicorn
-agentql
-asyncio
+selenium
 python-dotenv
-playwright
-langchain
-langchain_ollama==0.1.1
-
