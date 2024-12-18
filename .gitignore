@@ -1,8 +1,8 @@
 # Exclude environment variables file
 .env
 
-# Exclude Carousell products JSON file
-carousell_products.json
+# Exclude JSON file for all products
+all_products.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -16,11 +16,10 @@ cache = {}
 
 async def scrape_carousell_products(keywords):
     if keywords in cache:
+        print(f"Fetching cached results for: {keywords}")
         return cache[keywords]
 
     URL = f"https://www.carousell.com.my/search/{keywords}"
-    OUTPUT_FILE = "carousell_products.json"
-
     all_products = []
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
@@ -69,15 +68,56 @@ async def scrape_carousell_products(keywords):
         product_response = await page.query_data(PRODUCT_QUERY)
         all_products = product_response.get("products", [])
 
-        # Save data to JSON
-        with open(OUTPUT_FILE, "w") as f:
-            json.dump({"product_list": all_products}, f, indent=4)
-
-        print(f"Total {len(all_products)} products scraped. Data saved to {OUTPUT_FILE}")
         await browser.close()
 
     # tryna cache to avoid scraping again
     cache[keywords] = all_products
+    return all_products
+
+async def scrape_lazada_products(keywords):
+    URL = f"https://www.lazada.com.my/catalog/?q={keywords}"
+    all_products = []
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+            extra_http_headers={
+                "Accept-Language": "en-US,en;q=0.9",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            }
+        )
+        page = agentql.wrap(await context.new_page())
+        await page.goto(URL, wait_until="networkidle")
+
+        # Query using AgentQL
+        PRODUCT_QUERY = """
+        {
+            products[] {
+                name(name of product)
+                price
+                condition
+                img_link(link to the image of the product)
+                product_link(link to the product listing)
+            }
+        }
+        """
+        product_response = await page.query_data(PRODUCT_QUERY)
+        all_products = product_response.get("products", [])
+
+        await browser.close()
+
+    return all_products
+
+async def scrape_all_products(keywords):
+    carousell_products = await scrape_carousell_products(keywords)
+    # lazada_products = await scrape_lazada_products(keywords)
+    all_products = carousell_products # + lazada_products isnt working yet
+
+    # Save data to JSON
+    OUTPUT_FILE = "all_products.json"
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump({"product_list": all_products}, f, indent=4)
+
     return all_products
 
 # Function to extract relevant keywords using LangChain
@@ -120,8 +160,7 @@ def search():
     query = request.form['query']
     keywords = keyword_extractor(query)
     print(f"Extracted Keywords: {keywords}")
-    products = asyncio.run(scrape_carousell_products(keywords))
-    print(f"Products: {products}")
+    products = asyncio.run(scrape_all_products(keywords))
     return render_template('products.html', products=products)
 
 if __name__ == '__main__':
