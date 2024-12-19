@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
@@ -36,23 +36,24 @@ def scrape_carousell_products(keywords):
 
     try:
         WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "D_oB"))
+            EC.presence_of_element_located((By.CLASS_NAME, "D_la"))
         )
     except TimeoutException:
         print("Timeout while waiting for products to load.")
+        print(driver.page_source)  # Print the page source for debugging
         driver.quit()
         return []
 
     while True:
         try:
-            products = driver.find_elements(By.CLASS_NAME, "D_kM.D_pN")
+            products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")
             print(f"Found {len(products)} products on the page.")
             for product in products:
                 try:
                     name_element = product.find_element(By.CSS_SELECTOR, "p.D_jY.D_jZ.D_ke.D_kh.D_kk.D_km.D_ki.D_kv")
                     price_element = product.find_element(By.CSS_SELECTOR, "p.D_jY.D_jZ.D_ke.D_kg.D_kk.D_kn.D_ku")
-                    img_element = product.find_element(By.CSS_SELECTOR, "img.D_lQ.D_Uf")
-                    link_element = product.find_element(By.CSS_SELECTOR, "a.D_jt[href*='/p/']")
+                    img_element = product.find_element(By.CSS_SELECTOR, "img.D_mg.D_UM")
+                    link_element = product.find_element(By.CSS_SELECTOR, "a.D_jw[href*='/p/']")
 
                     name = name_element.text if name_element else "N/A"
                     price = price_element.text if price_element else "N/A"
@@ -68,6 +69,8 @@ def scrape_carousell_products(keywords):
                     print(f"Scraped product: {name}, {price}")
                 except NoSuchElementException as e:
                     print(f"Error scraping product: {e}")
+                except StaleElementReferenceException as e:
+                    print(f"Stale element reference: {e}")
             try:
                 next_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Next")
                 next_button.click()
@@ -91,7 +94,7 @@ def scrape_all_products(keywords):
 
     return all_products
 
-app = Flask(__name__) 
+app = Flask(__name__)
 
 @app.route('/')
 def index():
