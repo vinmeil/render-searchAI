@@ -48,10 +48,12 @@ def scrape_carousell_products(keywords):
         try:
             products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")
             print(f"Found {len(products)} products on the page.")
-            for product in products:
+            for index, product in enumerate(products):
                 try:
-                    name_element = product.find_element(By.CSS_SELECTOR, "p.D_jY.D_jZ.D_ke.D_kh.D_kk.D_km.D_ki.D_kv")
-                    price_element = product.find_element(By.CSS_SELECTOR, "p.D_jY.D_jZ.D_ke.D_kg.D_kk.D_kn.D_ku")
+                    name_xpath = ".//a[2]/p[1]"
+                    price_xpath = ".//a[2]/div[2]/p"
+                    name_element = product.find_element(By.XPATH, name_xpath)
+                    price_element = product.find_element(By.XPATH, price_xpath)
                     img_element = product.find_element(By.CSS_SELECTOR, "img.D_mg.D_UM")
                     link_element = product.find_element(By.CSS_SELECTOR, "a.D_jw[href*='/p/']")
 
