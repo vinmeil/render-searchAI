@@ -9,6 +9,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
 
 load_dotenv()
 cache = {} # cache for storing past search results to avoid scraping again
@@ -30,6 +32,7 @@ def get_driver():
 def scrape_carousell_products(driver, keywords):
     URL = f"https://www.carousell.com.my/search/{keywords}"
     all_products = []
+    failed_products = 0
 
     driver.get(URL)
     print("Navigating to Carousell page...")
@@ -48,7 +51,7 @@ def scrape_carousell_products(driver, keywords):
             print(f"Found {len(products)} products on Carousell.")
             for index, product in enumerate(products):
                 try:
-                    name_xpath = ".//a[2]/p[1]" # TODO: this xpath might break if Carousell changes their HTML structure
+                    name_xpath = ".//a[2]/p[1]"  # TODO: this xpath might break if Carousell changes their HTML structure
                     price_xpath = ".//a[2]/div[2]/p"
                     name_element = product.find_element(By.XPATH, name_xpath)
                     price_element = product.find_element(By.XPATH, price_xpath)
@@ -66,9 +69,8 @@ def scrape_carousell_products(driver, keywords):
                         "img_link": img_link,
                         "product_link": product_link
                     })
-                    print(f"Scraped Carousell product: {name}, {price}")
-                except NoSuchElementException as e:
-                    print(f"Error scraping Carousell product: {e}")
+                except NoSuchElementException:
+                    failed_products += 1
             try:
                 next_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Next")
                 next_button.click()
@@ -78,11 +80,13 @@ def scrape_carousell_products(driver, keywords):
         except NoSuchElementException:
             break
 
+    print(f"Carousell scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
     return all_products
 
 def scrape_zalora_products(driver, keywords):
     URL = f"https://www.zalora.com.my/search?q={keywords}"
     all_products = []
+    failed_products = 0
 
     driver.get(URL)
     print("Navigating to Zalora page...")
@@ -106,7 +110,6 @@ def scrape_zalora_products(driver, keywords):
 
             name = name_element.text if name_element else "N/A"
             price = price_element.text if price_element else "N/A"
-            # TODO: yet to include the brand name/product line
             img_link = img_element.get_attribute("src") if img_element else "N/A"
             product_link = link_element.get_attribute("href") if link_element else "N/A"
 
@@ -116,17 +119,14 @@ def scrape_zalora_products(driver, keywords):
                 "img_link": img_link,
                 "product_link": product_link
             })
-            print(f"Scraped Zalora product: {name}, {price}")
-        except NoSuchElementException as e:
-            print(f"Error scraping Zalora product: {e}")
+        except NoSuchElementException:
+            failed_products += 1
 
+    print(f"Zalora scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
     return all_products
 
-def scrape_all_products(keywords):
-    if keywords in cache:
-        print(f"Fetching cached results for: {keywords}")
-        return cache[keywords]
 
+def scrape_all_products(keywords):
     driver = get_driver()
     carousell_products = scrape_carousell_products(driver, keywords)
     zalora_products = scrape_zalora_products(driver, keywords)
@@ -134,12 +134,41 @@ def scrape_all_products(keywords):
 
     all_products =  carousell_products + zalora_products
 
-    OUTPUT_FILE = "all_products.json"
-    with open(OUTPUT_FILE, "w") as f:
-        json.dump({"product_list": all_products}, f, indent=4)
+    # OUTPUT_FILE = "all_products.json"
+    # with open(OUTPUT_FILE, "w") as f:
+    #     json.dump({"product_list": all_products}, f, indent=4)
 
-    cache[keywords] = all_products
-    return all_products
+    return {
+        "Carousell": carousell_products,
+        "Zalora": zalora_products,
+    }
+# Keyword Extractor using LangChain
+def keyword_extractor(query):
+    llm = ChatOllama(
+        model="llama3.1",
+        temperature=0.0,
+    )
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                """
+                You are a keyword extractor that, given a user sentence or question, will extract a searchable product on an ecommerce site.
+                Make sure to follow the guidelines below:
+                1. Do not ask questions.
+                2. Do not output a list.
+                3. Output only a few words (keywords).
+                4. If there are multiple keywords, only get the first one spaced correctly (for example if keyword extracted is "Leather Jacket, Black Shoes" only output Leather Jacket 
+                5. If user query does not include any product reply with "NONE".
+                6. If user searches for a product directly use that as keyword. For example if query is "hat" keyword should be "hat"
+                """,
+            ),
+            ("human", "{query}"),
+        ]
+    )
+    chain = prompt | llm
+    result = chain.invoke({"query": query})
+    return result.content
 
 app = Flask(__name__)
 
@@ -150,8 +179,11 @@ def index():
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
-    keywords = query  # TODO: implement keyword extraction using Ollama API
-    print(f"Extracted Keywords: {keywords}")
+    print(f"Query is: {query}")
+    keywords = keyword_extractor(query)
+    print(f"Extracted keywords {keywords}")
+    if keywords.lower() == "none":
+        return
     products = scrape_all_products(keywords)
     return render_template('products.html', products=products)
 
