@@ -8,6 +8,9 @@ async function scrapePGMall(keywords) {
     const page = await browser.newPage();
     await page.goto(URL, { waitUntil: 'networkidle2' });
 
+    // Scroll the page to trigger lazy loading
+    await autoScroll(page);
+
     await page.waitForSelector(".category_product_col_new");
 
     const products = await page.evaluate(() => {
@@ -38,6 +41,27 @@ async function scrapePGMall(keywords) {
 
     await browser.close();
     return products;
+}
+
+// PG Mall: special case to avoid lazy loading
+// Function to auto-scroll the page
+async function autoScroll(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve) => {
+            let totalHeight = 0;
+            const distance = 100;
+            const timer = setInterval(() => {
+                const scrollHeight = document.body.scrollHeight; // TODO: check
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 100);
+        });
+    });
 }
 
 const keywords = process.argv[2];
