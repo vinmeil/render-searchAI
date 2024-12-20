@@ -1,14 +1,7 @@
 import json
-import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from dotenv import load_dotenv
+import subprocess
 from flask import Flask, render_template, request
+from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 
@@ -16,128 +9,26 @@ load_dotenv()
 cache = {} # cache for storing past search results to avoid scraping again
 load_limit = 8 # scrape limit following products.html template
 
-# some spoofing to avoid bot detection. DO NOT REMOVE/CHANGE
-def get_driver():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
-    chrome_options.add_argument("--accept-language=en-US,en;q=0.9")
-    browser_driver = Service('chromedriver.exe')
-    driver = webdriver.Chrome(service=browser_driver, options=chrome_options)
-    return driver
-
-def scrape_carousell_products(driver, keywords):
-    URL = f"https://www.carousell.com.my/search/{keywords}"
-    all_products = []
-    failed_products = 0
-
-    driver.get(URL)
-    print("Navigating to Carousell page...")
-
-    try:
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "D_la"))
-        )
-    except TimeoutException:
-        print("Timeout while waiting for Carousell products to load.")
+def run_puppeteer_script(script, keywords):
+    result = subprocess.run(['node', script, keywords], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"Error running {script}: {result.stderr}")
         return []
+    return json.loads(result.stdout)
 
-    try:
-        products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")[:load_limit]
-        print(f"Found {len(products)} products on Carousell.")
-        for index, product in enumerate(products):
-            try:
-                name_xpath = ".//a[2]/p[1]"  # TODO: this xpath might break if Carousell changes their HTML structure
-                price_xpath = ".//a[2]/div[2]/p"
-                name_element = product.find_element(By.XPATH, name_xpath)
-                price_element = product.find_element(By.XPATH, price_xpath)
-                img_element = product.find_element(By.CSS_SELECTOR, "img.D_mg.D_UM")
-                link_element = product.find_element(By.CSS_SELECTOR, "a.D_jw[href*='/p/']")
+def scrape_carousell_products(keywords):
+    return run_puppeteer_script('puppeteer_scripts/scrape_carousell.js', keywords)
 
-                name = name_element.text if name_element else "N/A"
-                price = price_element.text if price_element else "N/A"
-                img_link = img_element.get_attribute("src") if img_element else "N/A"
-                product_link = link_element.get_attribute("href") if link_element else "N/A"
-
-                all_products.append({
-                    "name": name,
-                    "price": price,
-                    "img_link": img_link,
-                    "product_link": product_link
-                })
-            except NoSuchElementException:
-                failed_products += 1
-    except NoSuchElementException:
-        print("Managed to find products but failed to scrape them.")
-        pass
-
-    print(f"Carousell scraping complete. Successful: {len(all_products)}/{load_limit}, Failed: {failed_products}")
-    return all_products
-
-def scrape_zalora_products(driver, keywords):
-    URL = f"https://www.zalora.com.my/search?q={keywords}"
-    all_products = []
-    failed_products = 0
-
-    driver.get(URL)
-    print("Navigating to Zalora page...")
-
-    try:
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-test-id='productLink']"))
-        )
-    except TimeoutException:
-        print("Timeout while waiting for Zalora products to load.")
-        return []
-
-    try:
-        products = driver.find_elements(By.CSS_SELECTOR, "a[data-test-id='productLink']")[:load_limit]
-        print(f"Found {len(products)} products on Zalora.")
-        for product in products:
-            try:
-                name_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='productTitle']")
-                price_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='originalPrice']")
-                img_element = product.find_element(By.CSS_SELECTOR, "img")
-                link_element = product
-
-                name = name_element.text if name_element else "N/A"
-                price = price_element.text if price_element else "N/A"
-                img_link = img_element.get_attribute("src") if img_element else "N/A"
-                product_link = link_element.get_attribute("href") if link_element else "N/A"
-
-                all_products.append({
-                    "name": name,
-                    "price": price,
-                    "img_link": img_link,
-                    "product_link": product_link
-                })
-            except NoSuchElementException:
-                failed_products += 1
-    except NoSuchElementException:
-        print("Managed to find products but failed to scrape them.")
-        pass
-
-    print(f"Zalora scraping complete. Successful: {len(all_products)}/{load_limit}, Failed: {failed_products}")
-    return all_products
-
+def scrape_zalora_products(keywords):
+    return run_puppeteer_script('puppeteer_scripts/scrape_zalora.js', keywords)
 
 def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
         return cache[keywords]
     
-    driver = get_driver()
-    carousell_products = scrape_carousell_products(driver, keywords)
-    zalora_products = scrape_zalora_products(driver, keywords)
-    driver.quit()
-
-    # OUTPUT_FILE = "all_products.json"
-    # with open(OUTPUT_FILE, "w") as f:
-    #     json.dump({"product_list": all_products}, f, indent=4)
+    carousell_products = scrape_carousell_products(keywords)
+    zalora_products = scrape_zalora_products(keywords)
 
     all_products =  {
         "Carousell": carousell_products,
@@ -147,7 +38,6 @@ def scrape_all_products(keywords):
     cache[keywords] = all_products
     return all_products
 
-# Keyword Extractor using LangChain
 def keyword_extractor(query):
     llm = ChatOllama(
         model="llama3.1",

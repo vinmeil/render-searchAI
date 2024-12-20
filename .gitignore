@@ -1,6 +1,9 @@
 # Exclude environment variables file
 .env
 
+# node_modules
+node_modules/
+
 # Exclude JSON file for all products
 all_products.json
 
