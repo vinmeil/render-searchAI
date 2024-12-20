@@ -45,40 +45,34 @@ def scrape_carousell_products(driver, keywords):
         print("Timeout while waiting for Carousell products to load.")
         return []
 
-    while True:
-        try:
-            products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")
-            print(f"Found {len(products)} products on Carousell.")
-            for index, product in enumerate(products):
-                try:
-                    name_xpath = ".//a[2]/p[1]"  # TODO: this xpath might break if Carousell changes their HTML structure
-                    price_xpath = ".//a[2]/div[2]/p"
-                    name_element = product.find_element(By.XPATH, name_xpath)
-                    price_element = product.find_element(By.XPATH, price_xpath)
-                    img_element = product.find_element(By.CSS_SELECTOR, "img.D_mg.D_UM")
-                    link_element = product.find_element(By.CSS_SELECTOR, "a.D_jw[href*='/p/']")
-
-                    name = name_element.text if name_element else "N/A"
-                    price = price_element.text if price_element else "N/A"
-                    img_link = img_element.get_attribute("src") if img_element else "N/A"
-                    product_link = link_element.get_attribute("href") if link_element else "N/A"
-
-                    all_products.append({
-                        "name": name,
-                        "price": price,
-                        "img_link": img_link,
-                        "product_link": product_link
-                    })
-                except NoSuchElementException:
-                    failed_products += 1
+    try:
+        products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")
+        print(f"Found {len(products)} products on Carousell.")
+        for index, product in enumerate(products):
             try:
-                next_button = driver.find_element(By.PARTIAL_LINK_TEXT, "Next")
-                next_button.click()
-                time.sleep(5)
+                name_xpath = ".//a[2]/p[1]"  # TODO: this xpath might break if Carousell changes their HTML structure
+                price_xpath = ".//a[2]/div[2]/p"
+                name_element = product.find_element(By.XPATH, name_xpath)
+                price_element = product.find_element(By.XPATH, price_xpath)
+                img_element = product.find_element(By.CSS_SELECTOR, "img.D_mg.D_UM")
+                link_element = product.find_element(By.CSS_SELECTOR, "a.D_jw[href*='/p/']")
+
+                name = name_element.text if name_element else "N/A"
+                price = price_element.text if price_element else "N/A"
+                img_link = img_element.get_attribute("src") if img_element else "N/A"
+                product_link = link_element.get_attribute("href") if link_element else "N/A"
+
+                all_products.append({
+                    "name": name,
+                    "price": price,
+                    "img_link": img_link,
+                    "product_link": product_link
+                })
             except NoSuchElementException:
-                break
-        except NoSuchElementException:
-            break
+                failed_products += 1
+    except NoSuchElementException:
+        print("Managed to find products but failed to scrape them.")
+        pass
 
     print(f"Carousell scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
     return all_products
@@ -99,49 +93,59 @@ def scrape_zalora_products(driver, keywords):
         print("Timeout while waiting for Zalora products to load.")
         return []
 
-    products = driver.find_elements(By.CSS_SELECTOR, "a[data-test-id='productLink']")
-    print(f"Found {len(products)} products on Zalora.")
-    for product in products:
-        try:
-            name_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='productTitle']")
-            price_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='originalPrice']")
-            img_element = product.find_element(By.CSS_SELECTOR, "img")
-            link_element = product
+    try:
+        products = driver.find_elements(By.CSS_SELECTOR, "a[data-test-id='productLink']")
+        print(f"Found {len(products)} products on Zalora.")
+        for product in products:
+            try:
+                name_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='productTitle']")
+                price_element = product.find_element(By.CSS_SELECTOR, "div[data-test-id='originalPrice']")
+                img_element = product.find_element(By.CSS_SELECTOR, "img")
+                link_element = product
 
-            name = name_element.text if name_element else "N/A"
-            price = price_element.text if price_element else "N/A"
-            img_link = img_element.get_attribute("src") if img_element else "N/A"
-            product_link = link_element.get_attribute("href") if link_element else "N/A"
+                name = name_element.text if name_element else "N/A"
+                price = price_element.text if price_element else "N/A"
+                img_link = img_element.get_attribute("src") if img_element else "N/A"
+                product_link = link_element.get_attribute("href") if link_element else "N/A"
 
-            all_products.append({
-                "name": name,
-                "price": price,
-                "img_link": img_link,
-                "product_link": product_link
-            })
-        except NoSuchElementException:
-            failed_products += 1
+                all_products.append({
+                    "name": name,
+                    "price": price,
+                    "img_link": img_link,
+                    "product_link": product_link
+                })
+            except NoSuchElementException:
+                failed_products += 1
+    except NoSuchElementException:
+        print("Managed to find products but failed to scrape them.")
+        pass
 
     print(f"Zalora scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
     return all_products
 
 
 def scrape_all_products(keywords):
+    if keywords in cache:
+        print(f"Fetching cached results for: {keywords}")
+        return cache[keywords]
+    
     driver = get_driver()
     carousell_products = scrape_carousell_products(driver, keywords)
     zalora_products = scrape_zalora_products(driver, keywords)
     driver.quit()
 
-    all_products =  carousell_products + zalora_products
-
     # OUTPUT_FILE = "all_products.json"
     # with open(OUTPUT_FILE, "w") as f:
     #     json.dump({"product_list": all_products}, f, indent=4)
 
-    return {
+    all_products =  {
         "Carousell": carousell_products,
         "Zalora": zalora_products,
     }
+
+    cache[keywords] = all_products
+    return all_products
+
 # Keyword Extractor using LangChain
 def keyword_extractor(query):
     llm = ChatOllama(
