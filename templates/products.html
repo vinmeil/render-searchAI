@@ -201,6 +201,23 @@
             {% endfor %}
         </div>
         {% endif %}
+
+        <!-- PG Mall Products -->
+        {% if products.PGMall %}
+        <h2 class="section-title">PG Mall Products</h2>
+        <div class="products-grid">
+            {% for product in products.PGMall[:16] %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="this.src='fallback.jpg';">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price:</strong> {{ product.price }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
 
     <div class="footer">

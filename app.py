@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 
 load_dotenv()
-cache = {} # cache for storing past search results to avoid scraping again
+cache = {}
 load_limit = 8 # scrape limit following products.html template
 
 def run_puppeteer_script(script, keywords):
@@ -17,10 +17,16 @@ def run_puppeteer_script(script, keywords):
     return json.loads(result.stdout)
 
 def scrape_carousell_products(keywords):
+    print(f"Scraping Carousell...")
     return run_puppeteer_script('puppeteer_scripts/scrape_carousell.js', keywords)
 
 def scrape_zalora_products(keywords):
+    print(f"Scraping Zalora...")
     return run_puppeteer_script('puppeteer_scripts/scrape_zalora.js', keywords)
+
+def scrape_pgmall_products(keywords):
+    print(f"Scraping PGMall...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_pgmall.js', keywords)
 
 def scrape_all_products(keywords):
     if keywords in cache:
@@ -28,11 +34,16 @@ def scrape_all_products(keywords):
         return cache[keywords]
     
     carousell_products = scrape_carousell_products(keywords)
+    print("Done!")
     zalora_products = scrape_zalora_products(keywords)
+    print("Done!")
+    pgmall_products = scrape_pgmall_products(keywords)
+    print("Done!")
 
     all_products =  {
         "Carousell": carousell_products,
         "Zalora": zalora_products,
+        "PGMall": pgmall_products
     }
 
     cache[keywords] = all_products
@@ -74,9 +85,9 @@ def index():
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form['query']
-    print(f"Query is: {query}")
+    print(f"Query request from html: {query}")
     keywords = keyword_extractor(query)
-    print(f"Extracted keywords {keywords}")
+    print(f"Extracted keywords are: {keywords}")
     if keywords.lower() == "none":
         return
     products = scrape_all_products(keywords)

@@ -12,7 +12,7 @@ async function scrapeCarousell(keywords) {
     // const htmlContent = await page.content();
     // console.log(htmlContent);
 
-    // Wait for the product elements to load
+    // WARNING: Do not remove
     await page.waitForSelector(".D_la.D_or");
 
     try {
@@ -24,7 +24,7 @@ async function scrapeCarousell(keywords) {
                     const nameElement = product.querySelector("a.D_jw > p.D_jY");
                     const priceElement = product.querySelector("a.D_jw > div.D_nv > p.D_jY");
                     const imgElement = product.querySelector("a.D_jw > div.D_nk > div.D_UJ > img");
-                    const linkElement = product.querySelector("a.D_jw");
+                    const linkElement = product.querySelector("a.D_jw[href*='/p/']");
 
                     const name = nameElement ? nameElement.innerText.trim() : "N/A";
                     const price = priceElement ? priceElement.innerText.trim() : "N/A";
@@ -41,7 +41,9 @@ async function scrapeCarousell(keywords) {
             });
             return all_products;
         });
-
+        // WARNING: must comment out when running app.py
+        // uncomment only when testing this script ->
+        // node puppeteer_scripts/scrape_carousell.js "leather bag"
         // console.log(JSON.stringify(products));
         return products;
     } catch (error) {
