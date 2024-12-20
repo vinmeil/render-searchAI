@@ -17,7 +17,7 @@ async function scrapePGMall(keywords) {
         const productElements = document.querySelectorAll(".category_product_col_new");
         const all_products = [];
         productElements.forEach((product, index) => {
-            if (index <16) {
+            if (index < 8) {
                 const nameElement = product.querySelector(".p-name p");
                 const priceElement = product.querySelector(".p-price-red span");
                 const imgElement = product.querySelector(".product-img-wrapper img");

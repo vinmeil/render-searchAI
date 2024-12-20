@@ -7,7 +7,7 @@ from langchain_ollama import ChatOllama
 
 load_dotenv()
 cache = {}
-load_limit = 8 # scrape limit following products.html template
+# load_limit = 8 # scrape limit following products.html template
 
 def run_puppeteer_script(script, keywords):
     result = subprocess.run(['node', script, keywords], capture_output=True, text=True)
@@ -28,6 +28,10 @@ def scrape_pgmall_products(keywords):
     print(f"Scraping PGMall...")
     return run_puppeteer_script('puppeteer_scripts/scrape_pgmall.js', keywords)
 
+def scrape_ohgatcha_products(keywords):
+    print(f"Scraping Ohgatcha...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_ohgatcha.js', keywords)
+
 def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
@@ -39,11 +43,15 @@ def scrape_all_products(keywords):
     print("Done!")
     pgmall_products = scrape_pgmall_products(keywords)
     print("Done!")
-
+    # TODO: Fix the Ohgatcha scraper for price
+    # ohgatcha_products = scrape_ohgatcha_products(keywords)
+    print("Done!")
+    
     all_products =  {
         "Carousell": carousell_products,
         "Zalora": zalora_products,
-        "PGMall": pgmall_products
+        "PGMall": pgmall_products,
+        # "Ohgatcha": ohgatcha_products
     }
 
     cache[keywords] = all_products
