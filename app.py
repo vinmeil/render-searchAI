@@ -14,7 +14,12 @@ def run_puppeteer_script(script, keywords):
     if result.returncode != 0:
         print(f"Error running {script}: {result.stderr}")
         return []
-    return json.loads(result.stdout)
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError as e:
+        print(f"JSONDecodeError: {e}")
+        print(f"Output was: {result.stdout}")
+        return []
 
 def scrape_carousell_products(keywords):
     print(f"Scraping Carousell...")
@@ -44,14 +49,14 @@ def scrape_all_products(keywords):
     pgmall_products = scrape_pgmall_products(keywords)
     print("Done!")
     # TODO: Fix the Ohgatcha scraper for price
-    # ohgatcha_products = scrape_ohgatcha_products(keywords)
+    ohgatcha_products = scrape_ohgatcha_products(keywords)
     print("Done!")
     
     all_products =  {
         "Carousell": carousell_products,
         "Zalora": zalora_products,
         "PGMall": pgmall_products,
-        # "Ohgatcha": ohgatcha_products
+        "Ohgatcha": ohgatcha_products
     }
 
     cache[keywords] = all_products
