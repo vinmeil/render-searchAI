@@ -14,6 +14,7 @@ from langchain_ollama import ChatOllama
 
 load_dotenv()
 cache = {} # cache for storing past search results to avoid scraping again
+load_limit = 8 # scrape limit following products.html template
 
 # some spoofing to avoid bot detection. DO NOT REMOVE/CHANGE
 def get_driver():
@@ -46,7 +47,7 @@ def scrape_carousell_products(driver, keywords):
         return []
 
     try:
-        products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")
+        products = driver.find_elements(By.CLASS_NAME, "D_la.D_or")[:load_limit]
         print(f"Found {len(products)} products on Carousell.")
         for index, product in enumerate(products):
             try:
@@ -74,7 +75,7 @@ def scrape_carousell_products(driver, keywords):
         print("Managed to find products but failed to scrape them.")
         pass
 
-    print(f"Carousell scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
+    print(f"Carousell scraping complete. Successful: {len(all_products)}/{load_limit}, Failed: {failed_products}")
     return all_products
 
 def scrape_zalora_products(driver, keywords):
@@ -94,7 +95,7 @@ def scrape_zalora_products(driver, keywords):
         return []
 
     try:
-        products = driver.find_elements(By.CSS_SELECTOR, "a[data-test-id='productLink']")
+        products = driver.find_elements(By.CSS_SELECTOR, "a[data-test-id='productLink']")[:load_limit]
         print(f"Found {len(products)} products on Zalora.")
         for product in products:
             try:
@@ -120,7 +121,7 @@ def scrape_zalora_products(driver, keywords):
         print("Managed to find products but failed to scrape them.")
         pass
 
-    print(f"Zalora scraping complete. Successful: {len(all_products)}, Failed: {failed_products}")
+    print(f"Zalora scraping complete. Successful: {len(all_products)}/{load_limit}, Failed: {failed_products}")
     return all_products
 
 
