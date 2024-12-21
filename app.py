@@ -43,28 +43,42 @@ def scrape_goodsmile_products(keywords):
     print(f"Scraping Goodsmile...")
     return run_puppeteer_script('puppeteer_scripts/scrape_goodsmile.js', keywords)
 
+def scrape_hololive_products(keywords):
+    print(f"Scraping Hololive...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_hololive.js', keywords)
+
+def scrape_nijisanji_products(keywords):
+    print(f"Scraping Nijisanji...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_nijisanji.js', keywords)
+
 def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
         return cache[keywords]
     
-    carousell_products = scrape_carousell_products(keywords)
-    print("Done!")
-    zalora_products = scrape_zalora_products(keywords)
-    print("Done!")
-    pgmall_products = scrape_pgmall_products(keywords)
-    print("Done!")
+    # carousell_products = scrape_carousell_products(keywords)
+    # print("Done!")
+    # zalora_products = scrape_zalora_products(keywords)
+    # print("Done!")
+    # pgmall_products = scrape_pgmall_products(keywords)
+    # print("Done!")
     ohgatcha_products = scrape_ohgatcha_products(keywords)
     print("Done!")
     goodsmile_products = scrape_goodsmile_products(keywords)
     print("Done!")
+    hololive_products = scrape_hololive_products(keywords)
+    print("Done!")
+    nijisanji_products = scrape_nijisanji_products(keywords)
+    print("Done!")
     
     all_products =  {
-        "Carousell": carousell_products,
-        "Zalora": zalora_products,
-        "PGMall": pgmall_products,
+        # "Carousell": carousell_products,
+        # "Zalora": zalora_products,
+        # "PGMall": pgmall_products,
         "Ohgatcha": ohgatcha_products,
-        "GoodSmile": goodsmile_products
+        "GoodSmile": goodsmile_products,
+        "Hololive": hololive_products,
+        "Nijisanji": nijisanji_products
     }
 
     cache[keywords] = all_products
