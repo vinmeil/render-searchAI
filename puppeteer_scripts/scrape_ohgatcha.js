@@ -5,6 +5,7 @@ async function scrapeOhgatcha(keywords) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(URL, { waitUntil: 'networkidle2' });
+    
 
     const products = await page.evaluate(() => {
         const productElements = document.querySelectorAll(".product-wrap");
