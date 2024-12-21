@@ -60,12 +60,12 @@ def scrape_all_products(keywords):
         print(f"Fetching cached results for: {keywords}")
         return cache[keywords]
     
-    # carousell_products = scrape_carousell_products(keywords)
-    # print("Done!")
-    # zalora_products = scrape_zalora_products(keywords)
-    # print("Done!")
-    # pgmall_products = scrape_pgmall_products(keywords)
-    # print("Done!")
+    carousell_products = scrape_carousell_products(keywords)
+    print("Done!")
+    zalora_products = scrape_zalora_products(keywords)
+    print("Done!")
+    pgmall_products = scrape_pgmall_products(keywords)
+    print("Done!")
     ohgatcha_products = scrape_ohgatcha_products(keywords)
     print("Done!")
     goodsmile_products = scrape_goodsmile_products(keywords)
@@ -78,9 +78,9 @@ def scrape_all_products(keywords):
     print("Done!")
 
     all_products =  {
-        # "Carousell": carousell_products,
-        # "Zalora": zalora_products,
-        # "PGMall": pgmall_products,
+        "Carousell": carousell_products,
+        "Zalora": zalora_products,
+        "PGMall": pgmall_products,
         "Ohgatcha": ohgatcha_products,
         "GoodSmile": goodsmile_products,
         "Hololive": hololive_products,
@@ -107,6 +107,7 @@ def keyword_extractor(query):
                 2. Do not output a list.
                 3. Output only a few words (keywords).
                 4. If there are multiple keywords, only get the first one spaced correctly (for example if keyword extracted is "Leather Jacket, Black Shoes" only output Leather Jacket 
+                5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
                 5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
                 6. If user searches for a product directly use that as keyword. For example if query is "hat" keyword should be "hat"
                 """,
