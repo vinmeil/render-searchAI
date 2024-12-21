@@ -109,6 +109,7 @@ def keyword_extractor(query):
                 4. If there are multiple keywords, only get the first one spaced correctly (for example if keyword extracted is "Leather Jacket, Black Shoes" only output Leather Jacket 
                 5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
                 5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
+                5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
                 6. If user searches for a product directly use that as keyword. For example if query is "hat" keyword should be "hat"
                 """,
             ),
