@@ -216,6 +216,23 @@
             {% endfor %}
         </div>
         {% endif %}
+
+        <!-- GoodSmile Results-->
+        {% if products.GoodSmile %}
+        <h2>GoodSmile</h2>
+        <div class="products-grid">
+            {% for product in products.GoodSmile %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: ¥</strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         
         <!-- Search Bar -->
         <div class="search-bar">

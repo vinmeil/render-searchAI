@@ -15,6 +15,8 @@ def run_puppeteer_script(script, keywords):
         print(f"Error running {script}: {result.stderr}")
         return []
     try:
+        # force json.loads to parse the output, 
+        # and ignore any errors from websites that don't return valid JSON (return N/A)
         return json.loads(result.stdout)
     except json.JSONDecodeError as e:
         print(f"JSONDecodeError: {e}")
@@ -37,6 +39,10 @@ def scrape_ohgatcha_products(keywords):
     print(f"Scraping Ohgatcha...")
     return run_puppeteer_script('puppeteer_scripts/scrape_ohgatcha.js', keywords)
 
+def scrape_goodsmile_products(keywords):
+    print(f"Scraping Goodsmile...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_goodsmile.js', keywords)
+
 def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
@@ -48,15 +54,17 @@ def scrape_all_products(keywords):
     print("Done!")
     pgmall_products = scrape_pgmall_products(keywords)
     print("Done!")
-    # TODO: Fix the Ohgatcha scraper for price
     ohgatcha_products = scrape_ohgatcha_products(keywords)
+    print("Done!")
+    goodsmile_products = scrape_goodsmile_products(keywords)
     print("Done!")
     
     all_products =  {
         "Carousell": carousell_products,
         "Zalora": zalora_products,
         "PGMall": pgmall_products,
-        "Ohgatcha": ohgatcha_products
+        "Ohgatcha": ohgatcha_products,
+        "GoodSmile": goodsmile_products
     }
 
     cache[keywords] = all_products
