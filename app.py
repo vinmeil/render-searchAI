@@ -9,8 +9,8 @@ load_dotenv()
 cache = {}
 # load_limit = 8 # scrape limit following products.html template
 
-def run_puppeteer_script(script, keywords):
-    result = subprocess.run(['node', script, keywords], capture_output=True, text=True)
+def run_puppeteer_script(script, keywords): # TODO: check encoding='utf-8'
+    result = subprocess.run(['node', script, keywords], capture_output=True, text=True, encoding='utf-8')
     if result.returncode != 0:
         print(f"Error running {script}: {result.stderr}")
         return []
@@ -51,6 +51,10 @@ def scrape_nijisanji_products(keywords):
     print(f"Scraping Nijisanji...")
     return run_puppeteer_script('puppeteer_scripts/scrape_nijisanji.js', keywords)
 
+def scrape_mercari_products(keywords):
+    print(f"Scraping Mercari...")
+    return run_puppeteer_script('puppeteer_scripts/scrape_mercari.js', keywords)
+
 def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
@@ -70,7 +74,9 @@ def scrape_all_products(keywords):
     print("Done!")
     nijisanji_products = scrape_nijisanji_products(keywords)
     print("Done!")
-    
+    mercari_products = scrape_mercari_products(keywords)
+    print("Done!")
+
     all_products =  {
         # "Carousell": carousell_products,
         # "Zalora": zalora_products,
@@ -78,7 +84,8 @@ def scrape_all_products(keywords):
         "Ohgatcha": ohgatcha_products,
         "GoodSmile": goodsmile_products,
         "Hololive": hololive_products,
-        "Nijisanji": nijisanji_products
+        "Nijisanji": nijisanji_products,
+        "Mercari": mercari_products
     }
 
     cache[keywords] = all_products
@@ -100,7 +107,7 @@ def keyword_extractor(query):
                 2. Do not output a list.
                 3. Output only a few words (keywords).
                 4. If there are multiple keywords, only get the first one spaced correctly (for example if keyword extracted is "Leather Jacket, Black Shoes" only output Leather Jacket 
-                5. If user query does not include any product reply with "NONE".
+                5. If user query does not include any product reply with the query itself. For example is query is "miko" return "miko".
                 6. If user searches for a product directly use that as keyword. For example if query is "hat" keyword should be "hat"
                 """,
             ),

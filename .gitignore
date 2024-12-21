@@ -4,8 +4,10 @@
 # node_modules
 node_modules/
 
-# Exclude JSON file for all products
+# Exclude JSON file for all products (and other text files)
 all_products.json
+hololive.txt
+mercari.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
