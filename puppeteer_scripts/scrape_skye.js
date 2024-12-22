@@ -5,11 +5,11 @@ puppeteer.use(StealthPlugin());
 
 const BASE_URL = 'https://www.skye1204gaming.com';
 
-// Generate acronyms from a string
+// Generate acronyms from full keywords
 function generateAcronym(text) {
     return text
         .split(/\s+/) // Split by spaces
-        .map(word => word.charAt(0)) // Take first letter of each word
+        .map(word => word.charAt(0)) // Take the first letter
         .join('').toLowerCase(); // Combine and lowercase
 }
 
@@ -26,14 +26,16 @@ function acronymScore(keywordAcronym, nameAcronym) {
     return score;
 }
 
-// Matching algorithm with detailed scoring
+// Match and score menu items based on input
 function matchMenuItems(keywords, menus) {
-    const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize keywords
-    const keywordAcronym = generateAcronym(keywords); // Generate acronym for keywords
+    const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize input
+    const keywordAcronym = keywords.toLowerCase(); // Use full input directly as acronym
+
+    console.log(`Keyword Acronym: ${keywordAcronym}`); // Debug: Show keyword acronym
 
     const scoredMenus = menus.map(item => {
         const nameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const nameAcronym = generateAcronym(item.name);
+        const nameAcronym = generateAcronym(item.name); // Generate acronym for menu name
 
         let scores = {
             acronymExact: 0,
@@ -42,90 +44,92 @@ function matchMenuItems(keywords, menus) {
             substringMatch: 0,
         };
 
-        // 1. Exact acronym match - Highest priority
+        // Acronym scoring
         if (keywordAcronym === nameAcronym) {
-            scores.acronymExact = 200;
+            scores.acronymExact = 200; // Exact acronym match
         } else {
-            scores.acronymPartial = acronymScore(keywordAcronym, nameAcronym);
+            scores.acronymPartial = acronymScore(keywordAcronym, nameAcronym); // Partial acronym match
         }
 
-        // 2. Exact keyword match
+        // Exact match
         if (nameLower === keywordLower) scores.keywordExact = 100;
 
-        // 3. Substring match
+        // Substring match
         if (nameLower.includes(keywordLower)) scores.substringMatch = 50;
 
         // Total score
         const totalScore = Object.values(scores).reduce((sum, val) => sum + val, 0);
-        return { item, totalScore };
+        return { item, scores, totalScore };
     });
 
-    // Sort by score and return top 5 matches
+    // Sort by score and return top 8 matches
     scoredMenus.sort((a, b) => b.totalScore - a.totalScore);
-    return scoredMenus.slice(0, 5); // Top 5 matches
+
+    return scoredMenus.slice(0, 5);
 }
 
-// Scrape Skye with JSON output
+// Scrape Skye with the updated scoring system
 async function scrapeSkye(keywords) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
-        // Navigate to the main page
+        // Go to the homepage
         await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
 
-        // Extract menu items (categories)
+        // Extract menu items
         const menus = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('.list-menu__item')).map(item => ({
-                name: item.innerText.trim(),
-                link: item.getAttribute('href')
-            }));
+            return Array.from(document.querySelectorAll('.list-menu__item'))
+                .map(item => ({
+                    name: item.innerText.trim(),
+                    link: item.getAttribute('href') || null // Handle null links
+                }));
         });
 
-        // Match keywords with menus using scoring logic
+        // Handle dropdown substitutions
+        menus.forEach(item => {
+            // Substitute for "Fate/Grand Order"
+            if (item.name.toLowerCase() === 'fate/grand order') {
+                item.link = '/collections/fgo-jp'; // Default link for FGO JP
+            }
+
+            // Substitute for "Genshin Impact"
+            if (item.name.toLowerCase() === 'genshin impact') {
+                item.link = '/collections/genshin-impact'; // Default to "View All"
+            }
+        });
+
+        // Match input keywords to the best menu links
         const topMatches = matchMenuItems(keywords, menus);
+        console.log(topMatches);
 
         // Pick the best match
-        const bestMatch = topMatches[0]?.item;
+        const bestMatch = topMatches[0].item;
 
-        // If no match is found, return an empty array
-        if (!bestMatch || !bestMatch.link) {
-            return [];
-        }
-
-        // Navigate to the matched category page
-        const categoryURL = `${BASE_URL}${bestMatch.link}`;
-        await page.goto(categoryURL, { waitUntil: 'networkidle2' });
+        // Handle null links with fallback
+        const targetURL = `${BASE_URL}${bestMatch.link || '/collections/genshin-impact'}`; // Fallback if null
+        console.log(`Navigating to: ${targetURL}`);
+        await page.goto(targetURL, { waitUntil: 'networkidle2' });
 
         // Extract products
         const products = await page.evaluate((baseURL) => {
             const productElements = document.querySelectorAll('.card-wrapper.product-card-wrapper');
-
             return Array.from(productElements).map(element => {
-                // Extract Image
                 const imgElement = element.querySelector('.card__media img');
                 const imgLink = imgElement
                     ? (imgElement.getAttribute('src').startsWith('//')
                         ? `https:${imgElement.getAttribute('src')}`
                         : `${baseURL}${imgElement.getAttribute('src')}`)
                     : '';
-
-                // Extract Name
                 const nameElement = element.querySelector('.card__heading a');
-                const name = nameElement ? nameElement.textContent.trim() : 'No Name';
-
-                // Extract Price
-                const priceElement = element.querySelector('.price__sale .money') || 
-                                     element.querySelector('.price__regular .money');
-                const price = priceElement ? priceElement.textContent.trim() : 'N/A';
-
-                // Extract Product Link
+                const name = nameElement ? nameElement.textContent.trim() : '';
                 const linkElement = element.querySelector('.card__heading a');
                 const productLink = linkElement
                     ? `${baseURL}${linkElement.getAttribute('href')}`
                     : '';
-
-                // Return JSON format
+                const priceElement = element.querySelector('.price__sale .money') ||
+                                     element.querySelector('.price__regular .money');
+                const price = priceElement ? priceElement.textContent.trim() : '';
                 return {
                     name,
                     price,
@@ -136,6 +140,8 @@ async function scrapeSkye(keywords) {
         }, BASE_URL);
 
         // Return only top 8 products
+        console.log("\nExtracted Products:");
+        console.log(JSON.stringify(products.slice(0, 8), null, 2)); // Debug final products
         return products.slice(0, 8);
 
     } catch (error) {
@@ -147,11 +153,18 @@ async function scrapeSkye(keywords) {
 }
 
 // Keywords from arguments or default
-const keywords = process.argv[2] || 'fate grand order';
+let keywords = process.argv[2] || 'fate grand order';
+
+// Substitute for dropdown options
+if (keywords.toLowerCase() === 'fate grand order') {
+    keywords = 'fgo jp'; // Substitute "Fate/Grand Order"
+} else if (keywords.toLowerCase() === 'genshin impact') {
+    keywords = 'genshin-impact'; // Default to "View All" for Genshin Impact
+}
+
 scrapeSkye(keywords)
     .then(products => {
-        // Output valid JSON only
-        console.log(JSON.stringify(products, null, 2));
+        console.log(JSON.stringify(products, null, 2)); // Output valid JSON only
     })
     .catch(error => {
         console.error(JSON.stringify({ error: "Scraping failed", details: error.toString() }));
