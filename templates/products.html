@@ -285,6 +285,93 @@
         </div>
         {% endif %}
 
+        <!-- Animate Results -->
+        {% if products.Animate %}
+        <h2>Animate</h2>
+        <div class="products-grid">
+            {% for product in products.Animate %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: </strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Hobility Results -->
+        {% if products.Hobility %}
+        <h2>Hobility</h2>
+        <div class="products-grid">
+            {% for product in products.Hobility %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: </strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Shirotoys Results -->
+        {% if products.Shirotoys %}
+        <h2>Shirotoys</h2>
+        <div class="products-grid">
+            {% for product in products.Shirotoys %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: </strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Skye Results -->
+        {% if products.Skye %}
+        <h2>Skye</h2>
+        <div class="products-grid">
+            {% for product in products.Skye %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: </strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Ganknow Results-->
+        {% if products.Ganknow %}
+        <h2>Ganknow</h2>
+        <div class="products-grid">
+            {% for product in products.Ganknow %}
+            <div class="product-card">
+                <img src="{{ product.img_link }}" alt="Product Image" onerror="handleImageError(this)">
+                <h2>{{ product.name }}</h2>
+                <p><strong>Price: </strong> {{ product.price or "N/A" }}</p>
+                <a href="{{ product.product_link }}" target="_blank">
+                    <button>View Product</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+
 
 
 
