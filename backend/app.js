@@ -17,7 +17,11 @@ app.set("views", path.join(__dirname, "views"));
 // Helper function to run Puppeteer scripts
 function runPuppeteerScript(script, keywords) {
   return new Promise((resolve, reject) => {
-    exec(`node ${script} "${keywords}"`, (error, stdout, stderr) => {
+    const curDir = __dirname;
+    const basePath = curDir.split(".next")[0]; // TODO: This might break when deployed
+    const scriptPath = path.join(basePath, `backend/${script}`);
+    console.log("Script path:", scriptPath);
+    exec(`node ${scriptPath} "${keywords}"`, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error running ${script}:`, stderr);
         resolve([]);
@@ -159,29 +163,14 @@ async function keywordExtractor(query) {
   return result.content;
 }
 
-// Routes
-app.get("/", (req, res) => {
-  res.render("index");
-});
-
-app.post("/search", async (req, res) => {
-  const query = req.body.query;
-  console.log(`Query request from HTML: ${query}`);
-
+export async function getProducts(query) {
   const keywords = await keywordExtractor(query);
-  console.log(`Extracted keywords are: ${keywords}`);
-
-  if (keywords.toLowerCase() === "none") {
-    res.send("No valid keywords found.");
-    return;
-  }
-
   const products = await scrapeAllProducts(keywords);
-  res.render("products", { products });
-});
+  return products;
+}
 
 // Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// const PORT = process.env.PORT || 5173;
+// app.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}`);
+// });
