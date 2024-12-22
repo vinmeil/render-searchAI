@@ -1,10 +1,9 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const fs = require('fs/promises');
 
 puppeteer.use(StealthPlugin());
 
-const BASE_URL = 'https://malboro18games.com';
+const BASE_URL = 'https://www.skye1204gaming.com';
 
 // Generate acronyms from a string
 function generateAcronym(text) {
@@ -58,7 +57,7 @@ function matchMenuItems(keywords, menus) {
 
         // Total score
         const totalScore = Object.values(scores).reduce((sum, val) => sum + val, 0);
-        return { item, scores, totalScore };
+        return { item, totalScore };
     });
 
     // Sort by score and return top 5 matches
@@ -66,18 +65,16 @@ function matchMenuItems(keywords, menus) {
     return scoredMenus.slice(0, 5); // Top 5 matches
 }
 
-// Scrape Malboro with top scoring logic
-async function scrapeMalboro(keywords) {
+// Scrape Skye with JSON output
+async function scrapeSkye(keywords) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
-        // Visit the site and fetch menus
+        // Navigate to the main page
         await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
-        const html = await page.content();
-        await fs.writeFile('malboro_debug.html', html);
 
-        // Extract menu items
+        // Extract menu items (categories)
         const menus = await page.evaluate(() => {
             return Array.from(document.querySelectorAll('.list-menu__item')).map(item => ({
                 name: item.innerText.trim(),
@@ -88,27 +85,24 @@ async function scrapeMalboro(keywords) {
         // Match keywords with menus using scoring logic
         const topMatches = matchMenuItems(keywords, menus);
 
-        console.log('Top 5 Matches with Scores:');
-        topMatches.forEach((match, index) => {
-            console.log(`${index + 1}. ${match.item.name} (${BASE_URL}${match.item.link}) - Total Score: ${match.totalScore}`);
-            console.log(`   Acronym Exact: ${match.scores.acronymExact}`);
-            console.log(`   Acronym Partial: ${match.scores.acronymPartial}`);
-            console.log(`   Keyword Exact: ${match.scores.keywordExact}`);
-            console.log(`   Substring Match: ${match.scores.substringMatch}`);
-        });
+        // Pick the best match
+        const bestMatch = topMatches[0]?.item;
 
-        // Pick the best match and navigate to its page
-        const bestMatch = topMatches[0].item;
-        const targetURL = `${BASE_URL}${bestMatch.link}`;
-        console.log(`Navigating to: ${targetURL}`);
-        await page.goto(targetURL, { waitUntil: 'networkidle2' });
+        // If no match is found, return an empty array
+        if (!bestMatch || !bestMatch.link) {
+            return [];
+        }
 
-        // Extract product details
-        const products = await page.evaluate(() => {
-            const baseURL = 'https://malboro18games.com';
+        // Navigate to the matched category page
+        const categoryURL = `${BASE_URL}${bestMatch.link}`;
+        await page.goto(categoryURL, { waitUntil: 'networkidle2' });
+
+        // Extract products
+        const products = await page.evaluate((baseURL) => {
             const productElements = document.querySelectorAll('.card-wrapper.product-card-wrapper');
 
             return Array.from(productElements).map(element => {
+                // Extract Image
                 const imgElement = element.querySelector('.card__media img');
                 const imgLink = imgElement
                     ? (imgElement.getAttribute('src').startsWith('//')
@@ -116,18 +110,22 @@ async function scrapeMalboro(keywords) {
                         : `${baseURL}${imgElement.getAttribute('src')}`)
                     : '';
 
+                // Extract Name
                 const nameElement = element.querySelector('.card__heading a');
-                const name = nameElement ? nameElement.textContent.trim() : '';
+                const name = nameElement ? nameElement.textContent.trim() : 'No Name';
 
+                // Extract Price
+                const priceElement = element.querySelector('.price__sale .money') || 
+                                     element.querySelector('.price__regular .money');
+                const price = priceElement ? priceElement.textContent.trim() : 'N/A';
+
+                // Extract Product Link
                 const linkElement = element.querySelector('.card__heading a');
                 const productLink = linkElement
                     ? `${baseURL}${linkElement.getAttribute('href')}`
                     : '';
 
-                const priceElement = element.querySelector('.price__sale .money') ||
-                                     element.querySelector('.price__regular .money');
-                const price = priceElement ? priceElement.textContent.trim() : '';
-
+                // Return JSON format
                 return {
                     name,
                     price,
@@ -135,12 +133,13 @@ async function scrapeMalboro(keywords) {
                     product_link: productLink,
                 };
             });
-        });
+        }, BASE_URL);
 
-        // Return only **top 8 products** like Skye
+        // Return only top 8 products
         return products.slice(0, 8);
+
     } catch (error) {
-        console.error("Error scraping Malboro18Games:", error);
+        console.error("Error scraping Skye:", error);
         return [];
     } finally {
         await browser.close();
@@ -149,8 +148,11 @@ async function scrapeMalboro(keywords) {
 
 // Keywords from arguments or default
 const keywords = process.argv[2] || 'fate grand order';
-scrapeMalboro(keywords).then(products => {
-    console.log(JSON.stringify(products, null, 2));
-}).catch(error => {
-    console.error("Error:", error);
-});
+scrapeSkye(keywords)
+    .then(products => {
+        // Output valid JSON only
+        console.log(JSON.stringify(products, null, 2));
+    })
+    .catch(error => {
+        console.error(JSON.stringify({ error: "Scraping failed", details: error.toString() }));
+    });
