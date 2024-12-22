@@ -85,17 +85,17 @@ async def scrape_all_products(keywords):
         return cache[keywords]
 
     tasks = [
-        scrape_carousell_products(keywords),
-        scrape_zalora_products(keywords),
-        scrape_pgmall_products(keywords),
-        scrape_ohgatcha_products(keywords),
-        scrape_goodsmile_products(keywords),
-        scrape_hololive_products(keywords),
-        scrape_nijisanji_products(keywords),
-        scrape_mercari_products(keywords),
+        # scrape_carousell_products(keywords),
+        # scrape_zalora_products(keywords),
+        # scrape_pgmall_products(keywords),
+        # scrape_ohgatcha_products(keywords),
+        # scrape_goodsmile_products(keywords),
+        # scrape_hololive_products(keywords),
+        # scrape_nijisanji_products(keywords),
+        # scrape_mercari_products(keywords),
         # scrape_animate_products(keywords),
         # scrape_hobility_products(keywords),
-        # scrape_shirotoys_products(keywords),
+        scrape_shirotoys_products(keywords),
         # scrape_skye_products(keywords),
         # scrape_ganknow_products(keywords), # works, but have to modify the Ollama prompt "ALWAYS RETURN THE EXACT WORD "prikachu" FOR NOW"
 
@@ -104,17 +104,17 @@ async def scrape_all_products(keywords):
     results = await asyncio.gather(*tasks)
 
     all_products = {
-        "Carousell": results[0],
-        "Zalora": results[1],
-        "PGMall": results[2],
-        "Ohgatcha": results[3],
-        "GoodSmile": results[4],
-        "Hololive": results[5],
-        "Nijisanji": results[6],
-        "Mercari": results[7],
+        # "Carousell": results[0],
+        # "Zalora": results[1],
+        # "PGMall": results[2],
+        # "Ohgatcha": results[3],
+        # "GoodSmile": results[4],
+        # "Hololive": results[5],
+        # "Nijisanji": results[6],
+        # "Mercari": results[7],
         # "Animate": results[8],
         # "Hobility": results[9],
-        # "Shirotoys": results[10],
+        "Shirotoys": results[0],
         # "Skye": results[11],
         # "Ganknow": results[0], # set index to 0, not 12 for debugging
     }

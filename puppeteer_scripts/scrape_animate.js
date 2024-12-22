@@ -10,31 +10,33 @@ async function scrapeAnimate(keywords) {
         const productElements = document.querySelectorAll(".product-item.product-item--vertical");
         const allProducts = [];
 
-        productElements.forEach((product) => {
-            // Extract product name
-            const nameElement = product.querySelector(".product-item__title");
-            const name = nameElement ? nameElement.innerText.trim() : "N/A";
+        productElements.forEach((product, index) => {
+            if (index < 8) {
+                // Extract product name
+                const nameElement = product.querySelector(".product-item__title");
+                const name = nameElement ? nameElement.innerText.trim() : "N/A";
 
-            // Extract price
-            const priceElement = product.querySelector(".money");
-            const price = priceElement ? priceElement.innerText.trim() : "N/A";
+                // Extract price
+                const priceElement = product.querySelector(".money");
+                const price = priceElement ? priceElement.innerText.trim() : "N/A";
 
-            // Extract image link
-            const imgElement = product.querySelector(".product-item__image-wrapper img");
-            const imgLink = imgElement ? `https:${imgElement.getAttribute("src")}` : "N/A";
+                // Extract image link
+                const imgElement = product.querySelector(".product-item__image-wrapper img");
+                const imgLink = imgElement ? `https:${imgElement.getAttribute("src")}` : "N/A";
 
-            // Extract product link
-            const linkElement = product.querySelector(".product-item__title");
-            const productLink = linkElement
-                ? `https://www.animate.shop${linkElement.getAttribute("href")}`
-                : "N/A";
+                // Extract product link
+                const linkElement = product.querySelector(".product-item__title");
+                const productLink = linkElement
+                    ? `https://www.animate.shop${linkElement.getAttribute("href")}`
+                    : "N/A";
 
-            allProducts.push({
-                name: name,
-                price: price,
-                img_link: imgLink,
-                product_link: productLink,
-            });
+                allProducts.push({
+                    name: name,
+                    price: price,
+                    img_link: imgLink,
+                    product_link: productLink,
+                });
+            }
         });
 
         return allProducts;
