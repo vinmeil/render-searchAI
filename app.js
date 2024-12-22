@@ -125,46 +125,55 @@ async function scrapeMalboroProducts(keywords) {
     return await scrapeSite('Malboro', 'scrape_malboro.js', keywords);
 }
 
-// ---------- Combine Scraping Results ----------
 async function scrapeAllProducts(keywords) {
     logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
+    
+    // Check cache first
     if (cache[keywords]) {
         logWithTimestamp(`Fetching cached results for: ${keywords}`);
         return cache[keywords];
     }
 
+    // Start scraping tasks for all sites
     const tasks = [
         scrapeCarousellProducts(keywords),
         scrapeOhgatchaProducts(keywords),
         scrapeGoodSmileProducts(keywords),
-        scrapeNijisanjiProducts(keywords),
         scrapeAnimateProducts(keywords),
         scrapeHobilityProducts(keywords),
         scrapeShirotoysProducts(keywords),
         scrapeSkyeProducts(keywords),
-        scrapeGanknowProducts(keywords),
         scrapeMalboroProducts(keywords)
     ];
 
+    // Wait for all scraping tasks to complete
     const results = await Promise.all(tasks);
 
+    // Combine results into a structured object
     const allProducts = {
         Carousell: results[0],
         Ohgatcha: results[1],
         GoodSmile: results[2],
-        Nijisanji: results[3],
-        Animate: results[4],
-        Hobility: results[5],
-        Shirotoys: results[6],
-        Skye: results[7],
-        Ganknow: results[8],
-        Malboro: results[9]
+        Animate: results[3],
+        Hobility: results[4],
+        Shirotoys: results[5],
+        Skye: results[6],
+        Malboro: results[7]
     };
 
+    // Print JSON for each site
+    Object.keys(allProducts).forEach(site => {
+        logWithTimestamp(`Products from ${site}:`);
+        console.log(JSON.stringify(allProducts[site], null, 2)); // Pretty print JSON
+    });
+
+    // Cache the results
     cache[keywords] = allProducts;
+
     logWithTimestamp(`Completed scraping for keywords: ${keywords}`);
     return allProducts;
 }
+
 
 // ---------- Routes ----------
 app.get('/', (req, res) => res.render('index'));
