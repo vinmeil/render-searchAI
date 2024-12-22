@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { exec } = require('child_process');
+const { performance } = require('perf_hooks'); // Import performance module
 const { ChatOllama } = require('@langchain/ollama');
 const { ChatPromptTemplate } = require('@langchain/core/prompts');
 
@@ -16,6 +17,11 @@ app.use(express.static(path.join(__dirname, 'static'))); // Static files (CSS/JS
 app.set('view engine', 'ejs'); // Set EJS as template engine
 app.set('views', path.join(__dirname, 'templates')); // Point views to 'templates'
 
+// ---------- Utility for Timestamps ----------
+function logWithTimestamp(message) {
+    console.log(`[${new Date().toISOString()}] ${message}`);
+}
+
 // ---------- Ollama Keyword Extractor ----------
 const llm = new ChatOllama({
     model: 'llama3.1:latest', // Ensure exact model name
@@ -24,6 +30,7 @@ const llm = new ChatOllama({
 });
 
 async function keywordExtractor(query) {
+    logWithTimestamp('Starting keyword extraction...');
     const prompt = ChatPromptTemplate.fromMessages([
         {
             role: 'system',
@@ -43,23 +50,25 @@ async function keywordExtractor(query) {
 
     const chain = prompt.pipe(llm);
     const result = await chain.invoke({ query });
+    logWithTimestamp(`Extracted keywords: ${result.content.trim()}`);
     return result.content.trim();
 }
 
 // ---------- Helper Function for Puppeteer Scripts ----------
 function runPuppeteerScript(script, keywords) {
+    logWithTimestamp(`Running Puppeteer script: ${script} with keywords: ${keywords}`);
     return new Promise((resolve, reject) => {
         exec(`node puppeteer_scripts/${script} "${keywords}"`, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error running ${script}:`, stderr);
+                logWithTimestamp(`Error running ${script}: ${stderr}`);
                 resolve([]); // Return empty array on error
                 return;
             }
             try {
                 resolve(JSON.parse(stdout)); // Parse JSON output
             } catch (err) {
-                console.error('JSONDecodeError:', err);
-                console.error('Output was:', stdout);
+                logWithTimestamp(`JSONDecodeError: ${err}`);
+                logWithTimestamp(`Output was: ${stdout}`);
                 resolve([]); // Return empty array if JSON fails
             }
         });
@@ -67,61 +76,60 @@ function runPuppeteerScript(script, keywords) {
 }
 
 // ---------- Scraping Functions ----------
+async function scrapeSite(siteName, script, keywords) {
+    const start = performance.now(); // Start time
+    logWithTimestamp(`Scraping ${siteName}...`);
+    const result = await runPuppeteerScript(script, keywords);
+    const end = performance.now(); // End time
+    logWithTimestamp(`Finished scraping ${siteName} in ${(end - start).toFixed(2)} ms`);
+    return result;
+}
+
 async function scrapeCarousellProducts(keywords) {
-    console.log('Scraping Carousell...');
-    return await runPuppeteerScript('scrape_carousell.js', keywords);
+    return await scrapeSite('Carousell', 'scrape_carousell.js', keywords);
 }
 
 async function scrapeOhgatchaProducts(keywords) {
-    console.log('Scraping Ohgatcha...');
-    return await runPuppeteerScript('scrape_ohgatcha.js', keywords);
+    return await scrapeSite('Ohgatcha', 'scrape_ohgatcha.js', keywords);
 }
 
 async function scrapeGoodSmileProducts(keywords) {
-    console.log('Scraping Goodsmile...');
-    return await runPuppeteerScript('scrape_goodsmile.js', keywords);
+    return await scrapeSite('Goodsmile', 'scrape_goodsmile.js', keywords);
 }
 
 async function scrapeNijisanjiProducts(keywords) {
-    console.log('Scraping Nijisanji...');
-    return await runPuppeteerScript('scrape_nijisanji.js', keywords);
-}
-
-async function scrapeMercariProducts(keywords) {
-    console.log('Scraping Mercari...');
-    return await runPuppeteerScript('scrape_mercari.js', keywords);
+    return await scrapeSite('Nijisanji', 'scrape_nijisanji.js', keywords);
 }
 
 async function scrapeAnimateProducts(keywords) {
-    console.log('Scraping Animate...');
-    return await runPuppeteerScript('scrape_animate.js', keywords);
+    return await scrapeSite('Animate', 'scrape_animate.js', keywords);
 }
 
 async function scrapeHobilityProducts(keywords) {
-    console.log('Scraping Hobility...');
-    return await runPuppeteerScript('scrape_hobility.js', keywords);
+    return await scrapeSite('Hobility', 'scrape_hobility.js', keywords);
 }
 
 async function scrapeShirotoysProducts(keywords) {
-    console.log('Scraping Shirotoys...');
-    return await runPuppeteerScript('scrape_shirotoys.js', keywords);
+    return await scrapeSite('Shirotoys', 'scrape_shirotoys.js', keywords);
 }
 
 async function scrapeSkyeProducts(keywords) {
-    console.log('Scraping Skye...');
-    return await runPuppeteerScript('scrape_skye.js', keywords);
+    return await scrapeSite('Skye', 'scrape_skye.js', keywords);
 }
 
 async function scrapeGanknowProducts(keywords) {
-    console.log('Scraping Ganknow...');
-    return await runPuppeteerScript('scrape_ganknow.js', keywords);
+    return await scrapeSite('Ganknow', 'scrape_ganknow.js', keywords);
+}
+
+async function scrapeMalboroProducts(keywords) {
+    return await scrapeSite('Malboro', 'scrape_malboro.js', keywords);
 }
 
 // ---------- Combine Scraping Results ----------
 async function scrapeAllProducts(keywords) {
-    console.log("Keywords inside function:", keywords)
+    logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
     if (cache[keywords]) {
-        console.log(`Fetching cached results for: ${keywords}`);
+        logWithTimestamp(`Fetching cached results for: ${keywords}`);
         return cache[keywords];
     }
 
@@ -130,12 +138,12 @@ async function scrapeAllProducts(keywords) {
         scrapeOhgatchaProducts(keywords),
         scrapeGoodSmileProducts(keywords),
         scrapeNijisanjiProducts(keywords),
-        // scrapeMercariProducts(keywords),
         scrapeAnimateProducts(keywords),
         scrapeHobilityProducts(keywords),
         scrapeShirotoysProducts(keywords),
         scrapeSkyeProducts(keywords),
         scrapeGanknowProducts(keywords),
+        scrapeMalboroProducts(keywords)
     ];
 
     const results = await Promise.all(tasks);
@@ -145,15 +153,16 @@ async function scrapeAllProducts(keywords) {
         Ohgatcha: results[1],
         GoodSmile: results[2],
         Nijisanji: results[3],
-        Mercari: results[4],
-        Animate: results[5],
-        Hobility: results[6],
-        Shirotoys: results[7],
-        Skye: results[8],
-        Ganknow: results[9],
+        Animate: results[4],
+        Hobility: results[5],
+        Shirotoys: results[6],
+        Skye: results[7],
+        Ganknow: results[8],
+        Malboro: results[9]
     };
 
     cache[keywords] = allProducts;
+    logWithTimestamp(`Completed scraping for keywords: ${keywords}`);
     return allProducts;
 }
 
@@ -162,15 +171,16 @@ app.get('/', (req, res) => res.render('index'));
 
 app.post('/search', async (req, res) => {
     const query = req.body.query;
-    console.log(`Query request from HTML: ${query}`);
+    logWithTimestamp(`Query received: ${query}`);
 
     const keywords = await keywordExtractor(query);
-    console.log(`Extracted keywords are: ${keywords}`);
+    logWithTimestamp(`Extracted keywords: ${keywords}`);
 
     const products = await scrapeAllProducts(keywords);
     res.render('products', { products });
+    logWithTimestamp(`Rendering products for keywords: ${keywords}`);
 });
 
 // ---------- Start Server ----------
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => logWithTimestamp(`Server running on http://localhost:${PORT}`));

@@ -18,7 +18,7 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
             margin: 20px;
         }
@@ -80,38 +80,25 @@
     </div>
     <h1>Search Results</h1>
 
-    <!-- Skye Results -->
-    <% if (products.Skye && products.Skye.length > 0) { %>
-        <h2>Skye</h2>
-        <div class="products-grid">
-            <% products.Skye.forEach(product => { %>
-                <div class="product-card">
-                    <img src="<%= product.img_link %>" alt="Product Image">
-                    <h2><%= product.name %></h2>
-                    <p><strong>Price: </strong><%= product.price || "N/A" %></p>
-                    <a href="<%= product.product_link %>" target="_blank">
-                        <button>View Product</button>
-                    </a>
-                </div>
-            <% }) %>
-        </div>
-    <% } %>
-
-    <!-- Malboro Results -->
-    <% if (products.Malboro && products.Malboro.length > 0) { %>
-        <h2>Malboro</h2>
-        <div class="products-grid">
-            <% products.Malboro.forEach(product => { %>
-                <div class="product-card">
-                    <img src="<%= product.img_link %>" alt="Product Image">
-                    <h2><%= product.name %></h2>
-                    <p><strong>Price: </strong><%= product.price || "N/A" %></p>
-                    <a href="<%= product.product_link %>" target="_blank">
-                        <button>View Product</button>
-                    </a>
-                </div>
-            <% }) %>
-        </div>
-    <% } %>
+    <% Object.keys(products).forEach(source => { %>
+        <% if (products[source] && products[source].length > 0) { %>
+            <h2><%= source %></h2>
+            <div class="products-grid">
+                <% products[source].forEach(product => { %>
+                    <div class="product-card">
+                        <img src="<%= product.img_link %>" alt="Product Image">
+                        <h2><%= product.name %></h2>
+                        <p><strong>Price: </strong><%= product.price || "N/A" %></p>
+                        <a href="<%= product.product_link %>" target="_blank">
+                            <button>View Product</button>
+                        </a>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <h2><%= source %></h2>
+            <p style="text-align: center;">No products found.</p>
+        <% } %>
+    <% }) %>
 </body>
 </html>
