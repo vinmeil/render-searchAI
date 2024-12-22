@@ -135,7 +135,6 @@ async function scrapeSkye(keywords) {
                 const imgElement = element.querySelector('.media img');
                 const nameElement = element.querySelector('.card__heading a');
                 const priceElement = element.querySelector('.price__sale .price-item--sale');
-                const oldPriceElement = element.querySelector('.price__regular .price-item--regular');
 
                 return {
                     name: nameElement ? nameElement.textContent.trim() : '',
@@ -148,7 +147,6 @@ async function scrapeSkye(keywords) {
                     product_link: nameElement
                         ? `${baseURL}${nameElement.getAttribute('href')}` // Prepend baseURL for product links
                         : '',
-                    old_price: oldPriceElement ? oldPriceElement.textContent.trim() : null,
                 };
             });
         }, BASE_URL);
