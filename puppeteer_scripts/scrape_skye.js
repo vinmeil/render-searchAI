@@ -85,7 +85,7 @@ async function scrapeSkye(keywords) {
         await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
         const html = await page.content();
         fs.writeFileSync('debug.html', html);
-        console.log('HTML content saved to debug.html');
+        // console.log('HTML content saved to debug.html');
 
         // Extract menu items using regex
         const menuRegex = /<a id="HeaderDrawer-[^"]+" href="(\/collections\/[^"]+)"[^>]*?class="menu-drawer__menu-item[^"]*">([\s\S]*?)<\/a>/g;
@@ -99,19 +99,19 @@ async function scrapeSkye(keywords) {
             });
         }
 
-        console.log("Extracted Menus:", menus);
+        // console.log("Extracted Menus:", menus);
 
         // Match menu items using strict scoring
         const topMatches = matchMenuItems(keywords, menus);
 
         // Print the top 5 matches with detailed scores
-        console.log('Top 5 Matches with Scores:');
+        // console.log('Top 5 Matches with Scores:');
         topMatches.forEach((match, index) => {
-            console.log(`${index + 1}. ${match.item.name} (${BASE_URL}${match.item.link}) - Total Score: ${match.totalScore}`);
-            console.log(`   Acronym Exact: ${match.scores.acronymExact}`);
-            console.log(`   Acronym Partial: ${match.scores.acronymPartial}`);
-            console.log(`   Keyword Exact: ${match.scores.keywordExact}`);
-            console.log(`   Substring Match: ${match.scores.substringMatch}`);
+            // console.log(`${index + 1}. ${match.item.name} (${BASE_URL}${match.item.link}) - Total Score: ${match.totalScore}`);
+            // console.log(`   Acronym Exact: ${match.scores.acronymExact}`);
+            // console.log(`   Acronym Partial: ${match.scores.acronymPartial}`);
+            // console.log(`   Keyword Exact: ${match.scores.keywordExact}`);
+            // console.log(`   Substring Match: ${match.scores.substringMatch}`);
         });
 
         // Pick the best match
@@ -119,13 +119,13 @@ async function scrapeSkye(keywords) {
 
         // Handle no match found
         if (!bestMatch || !bestMatch.link) {
-            console.log('No matching keyword found.');
+            // console.log('No matching keyword found.');
             return [];
         }
 
         // Navigate to the best match page
         const URL = `${BASE_URL}${bestMatch.link}`;
-        console.log(`Navigating to: ${URL}`);
+        // console.log(`Navigating to: ${URL}`);
         await page.goto(URL, { waitUntil: 'networkidle2' });
 
         // Extract product details

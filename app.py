@@ -79,6 +79,10 @@ async def scrape_ganknow_products(keywords):
     print(f"Scraping Ganknow...")
     return await run_puppeteer_script('puppeteer_scripts/scrape_ganknow.js', keywords)
 
+async def scrape_epicnpc_products(keywords):
+    print(f"Scraping EpicNPC...")
+    return await run_puppeteer_script('puppeteer_scripts/scrape_epicnpc.js', keywords)
+
 async def scrape_all_products(keywords):
     if keywords in cache:
         print(f"Fetching cached results for: {keywords}")
@@ -88,17 +92,18 @@ async def scrape_all_products(keywords):
         scrape_carousell_products(keywords),
         scrape_zalora_products(keywords),
         scrape_pgmall_products(keywords),
-        scrape_ohgatcha_products(keywords),
-        scrape_goodsmile_products(keywords),
-        scrape_hololive_products(keywords),
-        scrape_nijisanji_products(keywords),
-        scrape_mercari_products(keywords),
+        # scrape_ohgatcha_products(keywords),
+        # scrape_goodsmile_products(keywords),
+        # scrape_hololive_products(keywords),
+        # scrape_nijisanji_products(keywords),
+        # scrape_mercari_products(keywords),
         # scrape_animate_products(keywords),
         # scrape_hobility_products(keywords),
         # scrape_shirotoys_products(keywords),
         # scrape_skye_products(keywords),
         # scrape_ganknow_products(keywords), # works, but have to modify the Ollama prompt "ALWAYS RETURN THE EXACT WORD "prikachu" FOR NOW"
-
+        # scrape_epicnpc_products(keywords),
+        
     ]
 
     results = await asyncio.gather(*tasks)
@@ -107,16 +112,17 @@ async def scrape_all_products(keywords):
         "Carousell": results[0],
         "Zalora": results[1],
         "PGMall": results[2],
-        "Ohgatcha": results[3],
-        "GoodSmile": results[4],
-        "Hololive": results[5],
-        "Nijisanji": results[6],
-        "Mercari": results[7],
+        # "Ohgatcha": results[3],
+        # "GoodSmile": results[4],
+        # "Hololive": results[5],
+        # "Nijisanji": results[6],
+        # "Mercari": results[7],
         # "Animate": results[8],
         # "Hobility": results[9],
         # "Shirotoys": results[10],
         # "Skye": results[11],
-        # "Ganknow": results[0], # set index to 0, not 12 for debugging
+        # "Ganknow": results[12], # set index to 0, not 12 for debugging
+        # "EpicNPC": results[13]
     }
 
     cache[keywords] = all_products
