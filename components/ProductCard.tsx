@@ -4,14 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const imageUrl = product.img_link!.startsWith("https:")
+    ? product.img_link!
+    : `https:${product.img_link!}`;
+
   return (
     <Link
       href={product.product_link!}
-      className="w-full md:h-[300px] rounded-xl flex flex-col border-2 border-border"
+      className="w-full md:h-[300px] rounded-xl flex flex-col border-b-2 border-border"
     >
       <div className="relative w-full h-0 pb-[100%]">
         <Image
-          src={product.img_link!}
+          src={imageUrl}
           alt={product.name!}
           layout="fill"
           objectFit="cover"
