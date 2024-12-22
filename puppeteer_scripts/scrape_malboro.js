@@ -27,10 +27,10 @@ function acronymScore(keywordAcronym, nameAcronym) {
     return score;
 }
 
-// Matching algorithm with detailed scoring
+// Match and score menu items based on input
 function matchMenuItems(keywords, menus) {
-    const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize keywords
-    const keywordAcronym = generateAcronym(keywords); // Generate acronym for keywords
+    const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const keywordAcronym = generateAcronym(keywords);
 
     const scoredMenus = menus.map(item => {
         const nameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -43,17 +43,17 @@ function matchMenuItems(keywords, menus) {
             substringMatch: 0,
         };
 
-        // 1. Exact acronym match - Highest priority
+        // Acronym scoring
         if (keywordAcronym === nameAcronym) {
-            scores.acronymExact = 200;
+            scores.acronymExact = 200; // Exact acronym match
         } else {
             scores.acronymPartial = acronymScore(keywordAcronym, nameAcronym);
         }
 
-        // 2. Exact keyword match
+        // Exact match
         if (nameLower === keywordLower) scores.keywordExact = 100;
 
-        // 3. Substring match
+        // Substring match
         if (nameLower.includes(keywordLower)) scores.substringMatch = 50;
 
         // Total score
@@ -61,49 +61,39 @@ function matchMenuItems(keywords, menus) {
         return { item, scores, totalScore };
     });
 
-    // Sort by score and return top 5 matches
+    // Sort and return top 8 matches
     scoredMenus.sort((a, b) => b.totalScore - a.totalScore);
-    return scoredMenus.slice(0, 5); // Top 5 matches
+    return scoredMenus.slice(0, 8); // Top 8 matches
 }
 
-// Scrape Malboro with top scoring logic
+// Scrape the Malboro page
 async function scrapeMalboro(keywords) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
-        // Visit the site and fetch menus
+        // Go to home page and fetch menu links
         await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
-        const html = await page.content();
-        await fs.writeFile('malboro_debug.html', html);
 
         // Extract menu items
         const menus = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('.list-menu__item')).map(item => ({
-                name: item.innerText.trim(),
-                link: item.getAttribute('href')
-            }));
+            return Array.from(document.querySelectorAll('.list-menu__item'))
+                .map(item => ({
+                    name: item.innerText.trim(),
+                    link: item.getAttribute('href')
+                }));
         });
 
-        // Match keywords with menus using scoring logic
+        // Match input keywords to the best menu links
         const topMatches = matchMenuItems(keywords, menus);
 
-        console.log('Top 5 Matches with Scores:');
-        topMatches.forEach((match, index) => {
-            console.log(`${index + 1}. ${match.item.name} (${BASE_URL}${match.item.link}) - Total Score: ${match.totalScore}`);
-            console.log(`   Acronym Exact: ${match.scores.acronymExact}`);
-            console.log(`   Acronym Partial: ${match.scores.acronymPartial}`);
-            console.log(`   Keyword Exact: ${match.scores.keywordExact}`);
-            console.log(`   Substring Match: ${match.scores.substringMatch}`);
-        });
-
-        // Pick the best match and navigate to its page
+        // Pick the best match
         const bestMatch = topMatches[0].item;
         const targetURL = `${BASE_URL}${bestMatch.link}`;
         console.log(`Navigating to: ${targetURL}`);
         await page.goto(targetURL, { waitUntil: 'networkidle2' });
 
-        // Extract product details
+        // Extract products
         const products = await page.evaluate(() => {
             const baseURL = 'https://malboro18games.com';
             const productElements = document.querySelectorAll('.card-wrapper.product-card-wrapper');
@@ -137,8 +127,8 @@ async function scrapeMalboro(keywords) {
             });
         });
 
-        // Return only **top 8 products** like Skye
-        return products.slice(0, 8);
+        // **Return only top 8 products**
+        return products.slice(0, 8); // Return only 8 accounts
     } catch (error) {
         console.error("Error scraping Malboro18Games:", error);
         return [];
@@ -147,10 +137,10 @@ async function scrapeMalboro(keywords) {
     }
 }
 
-// Keywords from arguments or default
+// Input keywords or default value
 const keywords = process.argv[2] || 'fate grand order';
 scrapeMalboro(keywords).then(products => {
-    console.log(JSON.stringify(products, null, 2));
+    console.log(JSON.stringify(products, null, 2)); // Print JSON output of top 8 accounts
 }).catch(error => {
     console.error("Error:", error);
 });
