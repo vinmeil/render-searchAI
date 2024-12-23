@@ -61,7 +61,7 @@ function runPuppeteerScript(script, keywords) {
     //   basePath,
     //   `backend/puppeteer_scripts/${script}`
     // );
-    // console.log("Script path:", scriptPath);
+    // console.log("Script path:", __dirname, script);
     exec(
       `node backend/puppeteer_scripts/${script} "${keywords}"`,
       (error, stdout, stderr) => {
