@@ -23,9 +23,13 @@ async function scrapeGoodSmile(keywords) {
                 const imgLink = imgElement ? imgElement.src : "N/A";
                 const productLink = linkElement ? linkElement.href : "N/A";
 
+                const priceNumber = parseFloat(price.replace(/,/g, ''));
+                const malaysianPrice = isNaN(priceNumber) ? "N/A" : (priceNumber * 0.029).toFixed(2);
+
                 all_products.push({
                     name: name,
-                    price: price, // TODO: Add conversion API for currency to MYR
+                    // TODO: use API to convert currency
+                    price: `¥${price} (RM${malaysianPrice})`,
                     img_link: imgLink,
                     product_link: productLink,
                 });

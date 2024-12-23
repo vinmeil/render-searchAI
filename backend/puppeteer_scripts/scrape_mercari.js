@@ -9,8 +9,6 @@ async function scrapeMercari(keywords) {
 
     await autoScroll(page);
 
-    await page.waitForSelector('li[data-testid="item-cell"]');
-
     const products = await page.evaluate(() => {
         const productElements = document.querySelectorAll('li[data-testid="item-cell"]');
         const all_products = [];

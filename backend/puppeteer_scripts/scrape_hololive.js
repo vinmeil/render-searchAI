@@ -1,6 +1,5 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const { writeFile, readFile } = require('fs/promises');
 puppeteer.use(StealthPlugin());
 
 async function scrapeHololivePro(keywords) {
@@ -10,63 +9,41 @@ async function scrapeHololivePro(keywords) {
     const page = await browser.newPage();
     await page.goto(URL, { waitUntil: 'networkidle2' });
 
-    try {
-        // Wait for the product grid container or a similar selector to ensure content is loaded
-        await page.waitForSelector('.product-grid-container');
+    const products = await page.evaluate(() => {
+        const productElements = document.querySelectorAll(".grid__item");
+        const allProducts = [];
 
-        // Save HTML content to a file for debugging and further processing
-        const html = await page.content();
-        await writeFile('hololive.txt', html, 'utf-8');
+        productElements.forEach((product, index) => {
+            if (index < 8) {
+                const nameElement = product.querySelector(".Item_body p");
+                const priceElement = product.querySelector(".Item_info_price .price1");
+                const imgElement = product.querySelector(".primary-image");
+                const linkElement = product.querySelector(".Item_inner");
 
-        // Extract image URLs using DOM and save placeholder values
-        const products = await page.evaluate(() => {
-            const imgElements = document.querySelectorAll('.primary-image');
-            const limitedProducts = [];
-            imgElements.forEach((img, index) => {
-                if (index < 8) {
-                    limitedProducts.push({
-                        name: "N/A",
-                        price: "N/A",
-                        img_link: img.src || "N/A",
-                        product_link: "N/A"
-                    });
-                }
-            });
-            return limitedProducts;
+                const name = nameElement ? nameElement.innerText.trim() : "N/A";
+                const price = priceElement ? priceElement.innerText.trim() : "N/A";
+                const imgLink = imgElement ? imgElement.src : "N/A";
+                const productLink = linkElement ? `https://shop.hololivepro.com${linkElement.getAttribute("href")}` : "N/A";
+
+                allProducts.push({
+                    name: name,
+                    price: price,
+                    img_link: imgLink,
+                    product_link: productLink,
+                });
+            }
         });
 
-        // Read the saved HTML file
-        const htmlContent = await readFile('hololive.txt', 'utf-8');
+        return allProducts //.filter(product => product.name !== "N/A" && product.price !== "N/A" && product.img_link !== "N/A" && product.product_link !== "N/A");
+    });
 
-        // Regex to extract products
-        const productMatches = [...htmlContent.matchAll(/"price":{"amount":([\d.]+),"currencyCode":"MYR"}.*?"title":"([^"]+)".*?"url":"(\\\/en\\\/products\\\/[^"]+)".*?"image":{"src":"([^"]+)"/g)];
-
-        for (let i = 0; i < products.length && i < productMatches.length; i++) {
-            const match = productMatches[i];
-            const price = match[1] ? `RM${match[1].trim()}` : "N/A";
-            const title = match[2] ? match[2].trim() : "N/A";
-            const relativeUrl = match[3] ? match[3].replace(/\\\//g, '/') : "";
-            const productLink = relativeUrl ? `https://shop.hololivepro.com${relativeUrl}` : "N/A";
-            const imgLink = match[4] ? match[4].replace(/\\\//g, '/') : "N/A";
-
-            products[i].name = title;
-            products[i].price = price;
-            products[i].product_link = productLink;
-            products[i].img_link = imgLink;
-        }
-
-        return products;
-    } catch (error) {
-        console.error("Error scraping HololivePro:", error);
-        return [];
-    } finally {
-        await browser.close();
-    }
+    await browser.close();
+    return products;
 }
 
-const keywords = process.argv[2] || 'pekora';
+const keywords = process.argv[2];
 scrapeHololivePro(keywords).then(products => {
-    console.log(JSON.stringify(products));
-}).catch(error => {
-    console.error("Error:", error);
+    console.log(JSON.stringify(products, null, 2));
+}).catch(err => {
+    console.error("Error:", err);
 });

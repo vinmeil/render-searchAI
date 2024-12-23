@@ -30,7 +30,7 @@ async function scrapeZalora(keywords) {
                 });
             }
         });
-        return all_products;
+        return all_products.filter(product => product.name !== "N/A" && product.price !== "N/A" && product.img_link !== "N/A" && product.product_link !== "N/A");
     });
 
     await browser.close();
