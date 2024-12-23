@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { HiPaperAirplane } from "react-icons/hi2";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
@@ -26,9 +26,15 @@ const PromptInput = ({
     event.preventDefault();
     setLoading(true);
     setQuery(inputValue);
-    router.push(`/?query=${inputValue}`, { scroll: false });
-    setInputValue("");
   };
+
+  useEffect(() => {
+    if (query) {
+      console.log("Query and Input Value:", query, inputValue);
+      router.push(`/?query=${query}`, { scroll: false });
+      setInputValue("");
+    }
+  }, [query, router]);
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
