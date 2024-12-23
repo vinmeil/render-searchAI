@@ -59,7 +59,7 @@ function runPuppeteerScript(script, keywords) {
     console.log("Script path:", scriptPath);
 
     exec(
-      `node app/api/products/${scriptPath} "${keywords}"`,
+      `node ${scriptPath} "${keywords}"`,
       // `node app/api/products/${script} "${keywords}"`,
       (error, stdout, stderr) => {
         // exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
