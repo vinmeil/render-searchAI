@@ -11,6 +11,8 @@ const ProductCard = ({ product }: { product: Product }) => {
   return (
     <Link
       href={product.product_link!}
+      target="_blank"
+      rel="noopener noreferrer"
       className="w-full md:h-[300px] rounded-xl flex flex-col border-b-2 border-border"
     >
       <div className="relative w-full h-0 pb-[100%]">

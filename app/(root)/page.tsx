@@ -25,10 +25,12 @@ export default function Home() {
     // placeholderRecommendations,
   ]);
 
+  const [query, setQuery] = useState<string>("");
+
   useEffect(() => {
     const newQuery = searchParams.get("query");
 
-    // go back to landing page
+    // go back to landing page if no query
     if (!newQuery) {
       setLoading(false);
       setResults([]);
@@ -38,16 +40,16 @@ export default function Home() {
     }
 
     const fetchProducts = async () => {
-      if (newQuery) {
-        setUserChats([...userChats, newQuery]);
+      if (query) {
+        setUserChats([...userChats, query]);
         try {
-          console.log("Query inside fetchProducts", newQuery);
+          console.log("Query inside fetchProducts", query);
           const res = await fetch("/api/products", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ query: newQuery }),
+            body: JSON.stringify({ query }),
           });
 
           if (!res.ok) {
@@ -58,6 +60,7 @@ export default function Home() {
           setResults([...results, data]);
           setResponses([...responses, data]);
           setLoading(false);
+          setQuery("");
           console.log("Data inside function:", data);
         } catch (err: any) {
           console.error(err.message);
@@ -66,12 +69,15 @@ export default function Home() {
     };
 
     fetchProducts();
-    console.log("Results", results);
-  }, [searchParams]);
+    window.scrollBy({
+      top: window.innerHeight,
+      behavior: "smooth",
+    });
+  }, [query]);
 
   return (
     <>
-      {results.length > 0 ? (
+      {userChats.length > 0 ? (
         <div className="flex flex-col justify-center items-center w-screen relative">
           <div className="md:w-[60%] h-screen">
             <Chat
@@ -80,11 +86,16 @@ export default function Home() {
               loading={loading}
             />
           </div>
+          <div className="bg-opacity-0 pointer-events-none cursor-not-allowed">
+            dont delete this
+          </div>
           <div className="fixed bottom-5 md:w-[50%]">
             <PromptInput
               placeholder="Search for something else..."
               loading={loading}
               setLoading={setLoading}
+              query={query}
+              setQuery={setQuery}
             />
           </div>
         </div>
@@ -95,7 +106,12 @@ export default function Home() {
             <p className="text-muted-foreground mb-5">
               Search and discover everything.
             </p>
-            <PromptInput loading={loading} setLoading={setLoading} />
+            <PromptInput
+              loading={loading}
+              setLoading={setLoading}
+              query={query}
+              setQuery={setQuery}
+            />
             <div className="md:w-screen flex flex-col items-center mt-6">
               <h1 className="w-[60%] mb-3 font-playfair">AI Recommendations</h1>
               <div className="flex flex-row gap-2 justify-center items-center w-[60%]">

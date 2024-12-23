@@ -14,16 +14,12 @@ const Chat = ({
   loading: boolean;
 }) => {
   console.log("Responses from scraping:", responses);
-  console.log(
-    "Testing the flattening:",
-    Object.values(responses[0])?.flatMap((array) => array)
-  );
 
   return (
-    <div className="md:pb-[120px] flex flex-col items-center gap-6">
+    <div className="md:pb-[120px] flex flex-col items-center gap-6 w-full">
       {userChats.map((_, index) => (
         <div key={index} className="flex flex-col gap-2">
-          {userChats[index] && responses[index] && (
+          {userChats[index] && (
             <>
               <div className="flex gap-2 items-center mt-6">
                 <div className="border border-border rounded-lg p-2 shadow-lg">
@@ -35,6 +31,7 @@ const Chat = ({
                 <div className="grid gap-2 grid-cols-4">
                   {Object.values(responses[index])
                     ?.flatMap((array) => array)
+                    .filter((product) => product.name !== "N/A")
                     .slice(0, 24)
                     .map((product, index) => (
                       <div key={index}>

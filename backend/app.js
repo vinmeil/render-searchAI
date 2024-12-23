@@ -164,8 +164,13 @@ async function keywordExtractor(query) {
 }
 
 export async function getProducts(query) {
-  const keywords = await keywordExtractor(query);
-  const products = await scrapeAllProducts(keywords);
+  // With llama
+  // const keywords = await keywordExtractor(query);
+  // const products = await scrapeAllProducts(keywords);
+  // return products;
+
+  // Without llama
+  const products = await scrapeAllProducts(query);
   return products;
 }
 

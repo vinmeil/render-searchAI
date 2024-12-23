@@ -10,22 +10,28 @@ const PromptInput = ({
   placeholder,
   loading,
   setLoading,
+  query,
+  setQuery,
 }: {
   placeholder?: string;
   loading: boolean;
   setLoading: any;
+  query: string;
+  setQuery: any;
 }) => {
   const [inputValue, setInputValue] = useState<string>("");
   const router = useRouter();
 
-  const handleSubmit = () => {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
-    router.push(`/?query=${inputValue}`);
+    setQuery(inputValue);
+    router.push(`/?query=${inputValue}`, { scroll: false });
     setInputValue("");
   };
 
   return (
-    <div className="relative w-full">
+    <form onSubmit={handleSubmit} className="relative w-full">
       <Input
         placeholder={
           placeholder ? placeholder : "Search for something online..."
@@ -33,9 +39,6 @@ const PromptInput = ({
         className="rounded-full bg-[#fffdf5] pr-16"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={(e) => {
-          e.key === "Enter" && handleSubmit();
-        }}
       />
       <button
         disabled={!inputValue}
@@ -43,7 +46,6 @@ const PromptInput = ({
         className={`${
           !inputValue && "bg-muted-foreground"
         } absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-white p-3 text-xl rounded-full`}
-        onClick={handleSubmit}
       >
         {loading ? (
           <AiOutlineLoading3Quarters className="animate-spin" size={32} />
@@ -51,7 +53,7 @@ const PromptInput = ({
           <HiPaperAirplane />
         )}
       </button>
-    </div>
+    </form>
   );
 };
 
