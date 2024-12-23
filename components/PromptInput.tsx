@@ -36,7 +36,7 @@ const PromptInput = ({
         placeholder={
           placeholder ? placeholder : "Search for something online..."
         }
-        className="rounded-full bg-[#fffdf5] pr-16"
+        className="rounded-full bg-[#fbfbfb] pr-16"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />

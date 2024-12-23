@@ -5,6 +5,8 @@ import React from "react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 
+import { SignedOut, SignedIn, UserButton } from "@clerk/nextjs";
+
 const Navbar = () => {
   const router = useRouter();
 
@@ -26,7 +28,16 @@ const Navbar = () => {
           </span>
           <span className="absolute left-0 bottom-0 w-full h-[2px] bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
         </Link>
-        <Button className="bg-primary-2">Log In</Button>
+
+        <SignedOut>
+          <Button className="bg-primary-2">
+            <Link href="/sign-in">Login</Link>
+          </Button>
+        </SignedOut>
+
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
       </div>
     </div>
   );

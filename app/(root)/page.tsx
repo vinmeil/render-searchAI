@@ -29,13 +29,16 @@ export default function Home() {
 
   useEffect(() => {
     const newQuery = searchParams.get("query");
+    console.log("New Query from search params:", newQuery);
+    console.log("Page URL Changed, query from state:", query);
 
     // go back to landing page if no query
-    if (!newQuery) {
+    if (!newQuery && !query) {
       setLoading(false);
       setResults([]);
       setResponses([]);
       setUserChats([]);
+      console.log("No query, returning...");
       return;
     }
 
@@ -59,8 +62,8 @@ export default function Home() {
           const data = await res.json();
           setResults([...results, data]);
           setResponses([...responses, data]);
-          setLoading(false);
           setQuery("");
+          setLoading(false);
           console.log("Data inside function:", data);
         } catch (err: any) {
           console.error(err.message);
@@ -73,7 +76,15 @@ export default function Home() {
       top: window.innerHeight,
       behavior: "smooth",
     });
-  }, [query]);
+  }, [query, searchParams]);
+
+  useEffect(() => {
+    const newQuery = searchParams.get("query");
+
+    if (!newQuery) {
+      setQuery("");
+    }
+  }, [searchParams]);
 
   return (
     <>
@@ -85,9 +96,6 @@ export default function Home() {
               responses={responses}
               loading={loading}
             />
-          </div>
-          <div className="bg-opacity-0 pointer-events-none cursor-not-allowed">
-            dont delete this
           </div>
           <div className="fixed bottom-5 md:w-[50%]">
             <PromptInput
