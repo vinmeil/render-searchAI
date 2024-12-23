@@ -32,7 +32,7 @@ function matchMenuItems(keywords, menus) {
     // Preserve full keyword acronym (e.g., "fgo")
     const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize input
     const keywordAcronym = keywords.toLowerCase(); // Use the full input directly for acronym
-    console.log(`Keyword Acronym: ${keywordAcronym}`); // Debug: Show the generated acronym
+    // console.log(`Keyword Acronym: ${keywordAcronym}`); // Debug: Show the generated acronym
 
     const scoredMenus = menus.map(item => {
         const nameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -66,16 +66,16 @@ function matchMenuItems(keywords, menus) {
     // Sort by score and return top 8 matches
     scoredMenus.sort((a, b) => b.totalScore - a.totalScore);
 
-    // Debug: Print top 5 matches with score breakdown
-    console.log("\nTop 5 Matches with Score Breakdown:");
-    scoredMenus.slice(0, 5).forEach((match, index) => {
-        console.log(`\n#${index + 1}: ${match.item.name}`);
-        console.log(`  Acronym Exact: ${match.scores.acronymExact}`);
-        console.log(`  Acronym Partial: ${match.scores.acronymPartial}`);
-        console.log(`  Keyword Exact: ${match.scores.keywordExact}`);
-        console.log(`  Substring Match: ${match.scores.substringMatch}`);
-        console.log(`  Total Score: ${match.totalScore}`);
-    });
+    // // Debug: Print top 5 matches with score breakdown
+    // console.log("\nTop 5 Matches with Score Breakdown:");
+    // scoredMenus.slice(0, 5).forEach((match, index) => {
+    //     console.log(`\n#${index + 1}: ${match.item.name}`);
+    //     console.log(`  Acronym Exact: ${match.scores.acronymExact}`);
+    //     console.log(`  Acronym Partial: ${match.scores.acronymPartial}`);
+    //     console.log(`  Keyword Exact: ${match.scores.keywordExact}`);
+    //     console.log(`  Substring Match: ${match.scores.substringMatch}`);
+    //     console.log(`  Total Score: ${match.totalScore}`);
+    // });
 
     return scoredMenus.slice(0, 8); // Top 8 matches
 }
@@ -104,7 +104,7 @@ async function scrapeMalboro(keywords) {
         // Pick the best match
         const bestMatch = topMatches[0].item;
         const targetURL = `${BASE_URL}${bestMatch.link}`;
-        console.log(`Navigating to: ${targetURL}`);
+        // console.log(`Navigating to: ${targetURL}`);
         await page.goto(targetURL, { waitUntil: 'networkidle2' });
 
         // Extract products
@@ -137,7 +137,7 @@ async function scrapeMalboro(keywords) {
         });
 
         // Return only top 8 products
-        console.log("\nExtracted Products:");
+        // console.log("\nExtracted Products:");
         console.log(JSON.stringify(products.slice(0, 8), null, 2)); // Debug final products
     } catch (error) {
         console.error("Error scraping Malboro18Games:", error);

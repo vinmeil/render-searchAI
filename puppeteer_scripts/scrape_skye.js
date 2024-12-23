@@ -31,8 +31,6 @@ function matchMenuItems(keywords, menus) {
     const keywordLower = keywords.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize input
     const keywordAcronym = keywords.toLowerCase(); // Use full input directly as acronym
 
-    console.log(`Keyword Acronym: ${keywordAcronym}`); // Debug: Show keyword acronym
-
     const scoredMenus = menus.map(item => {
         const nameLower = item.name.toLowerCase().replace(/[^a-z0-9]/g, '');
         const nameAcronym = generateAcronym(item.name); // Generate acronym for menu name
@@ -101,14 +99,12 @@ async function scrapeSkye(keywords) {
 
         // Match input keywords to the best menu links
         const topMatches = matchMenuItems(keywords, menus);
-        console.log(topMatches);
 
         // Pick the best match
         const bestMatch = topMatches[0].item;
 
         // Handle null links with fallback
         const targetURL = `${BASE_URL}${bestMatch.link || '/collections/genshin-impact'}`; // Fallback if null
-        console.log(`Navigating to: ${targetURL}`);
         await page.goto(targetURL, { waitUntil: 'networkidle2' });
 
         // Extract products
@@ -140,12 +136,9 @@ async function scrapeSkye(keywords) {
         }, BASE_URL);
 
         // Return only top 8 products
-        console.log("\nExtracted Products:");
-        console.log(JSON.stringify(products.slice(0, 8), null, 2)); // Debug final products
         return products.slice(0, 8);
 
     } catch (error) {
-        console.error("Error scraping Skye:", error);
         return [];
     } finally {
         await browser.close();
