@@ -55,24 +55,12 @@ async function keywordExtractor(query) {
 // ---------- Helper Function for Puppeteer Scripts ----------
 function runPuppeteerScript(script, keywords) {
   return new Promise((resolve, reject) => {
-    // const curDir = __dirname;
-    // const basePath = curDir.split(".next")[0]; // TODO: This might break when deployed
-    // const scriptPath = path.join(
-    //   basePath,
-    //   `backend/puppeteer_scripts/${script}`
-    // );
-    // console.log("Script path:", __dirname, script);
-
-    // const path = require("path");
-
-    // Use dirname to get the current directory
-    // const scriptPath = path.join(__dirname, "backend", script);
-
-    // Require the module
-    // const script = require(scriptPath);
+    const scriptPath = path.resolve(__dirname, `./${script}`);
+    console.log("Script path:", scriptPath);
 
     exec(
-      `node app/api/products/${script} "${keywords}"`,
+      `node app/api/products/${scriptPath} "${keywords}"`,
+      // `node app/api/products/${script} "${keywords}"`,
       (error, stdout, stderr) => {
         // exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
         if (error) {
