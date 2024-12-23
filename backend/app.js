@@ -55,8 +55,15 @@ async function keywordExtractor(query) {
 // ---------- Helper Function for Puppeteer Scripts ----------
 function runPuppeteerScript(script, keywords) {
   return new Promise((resolve, reject) => {
+    // const curDir = __dirname;
+    // const basePath = curDir.split(".next")[0]; // TODO: This might break when deployed
+    // const scriptPath = path.join(
+    //   basePath,
+    //   `backend/puppeteer_scripts/${script}`
+    // );
+    // console.log("Script path:", scriptPath);
     exec(
-      `node puppeteer_scripts/${script} "${keywords}"`,
+      `node backend/puppeteer_scripts/${script} "${keywords}"`,
       (error, stdout, stderr) => {
         if (error) {
           logWithTimestamp(`Error running ${script}: ${stderr}`);
