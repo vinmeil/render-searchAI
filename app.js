@@ -30,7 +30,6 @@ const llm = new ChatOllama({
 });
 
 async function keywordExtractor(query) {
-    logWithTimestamp('Starting keyword extraction...');
     const prompt = ChatPromptTemplate.fromMessages([
         {
             role: 'system',
@@ -50,13 +49,11 @@ async function keywordExtractor(query) {
 
     const chain = prompt.pipe(llm);
     const result = await chain.invoke({ query });
-    logWithTimestamp(`Extracted keywords: ${result.content.trim()}`);
     return result.content.trim();
 }
 
 // ---------- Helper Function for Puppeteer Scripts ----------
 function runPuppeteerScript(script, keywords) {
-    logWithTimestamp(`Running Puppeteer script: ${script} with keywords: ${keywords}`);
     return new Promise((resolve, reject) => {
         exec(`node puppeteer_scripts/${script} "${keywords}"`, (error, stdout, stderr) => {
             if (error) {
@@ -78,15 +75,23 @@ function runPuppeteerScript(script, keywords) {
 // ---------- Scraping Functions ----------
 async function scrapeSite(siteName, script, keywords) {
     const start = performance.now(); // Start time
-    logWithTimestamp(`Scraping ${siteName}...`);
+    console.log(`Scraping ${siteName}...`);
     const result = await runPuppeteerScript(script, keywords);
     const end = performance.now(); // End time
-    logWithTimestamp(`Finished scraping ${siteName} in ${(end - start).toFixed(2)} ms`);
+    console.log(`Finished scraping ${siteName} in ${(end - start).toFixed(2)} ms`);
     return result;
 }
 
 async function scrapeCarousellProducts(keywords) {
     return await scrapeSite('Carousell', 'scrape_carousell.js', keywords);
+}
+
+async function scrapeZaloraProducts(keywords) {
+    return await scrapeSite('Zalora', 'scrape_zalora.js', keywords);
+}
+
+async function scrapePgmallProducts(keywords) {
+    return await scrapeSite('PGMall', 'scrape_pgmall.js', keywords);
 }
 
 async function scrapeOhgatchaProducts(keywords) {
@@ -97,16 +102,20 @@ async function scrapeGoodSmileProducts(keywords) {
     return await scrapeSite('Goodsmile', 'scrape_goodsmile.js', keywords);
 }
 
-async function scrapeNijisanjiProducts(keywords) {
-    return await scrapeSite('Nijisanji', 'scrape_nijisanji.js', keywords);
-}
-
 async function scrapeAnimateProducts(keywords) {
     return await scrapeSite('Animate', 'scrape_animate.js', keywords);
 }
 
 async function scrapeHobilityProducts(keywords) {
     return await scrapeSite('Hobility', 'scrape_hobility.js', keywords);
+}
+
+async function scrapeHololiveProducts(keywords) {
+    return await scrapeSite('Hololive', 'scrape_hololive.js', keywords);
+}
+
+async function scrapeNijisanjiProducts(keywords) {
+    return await scrapeSite('Nijisanji', 'scrape_nijisanji.js', keywords);
 }
 
 async function scrapeShirotoysProducts(keywords) {
@@ -117,12 +126,20 @@ async function scrapeSkyeProducts(keywords) {
     return await scrapeSite('Skye', 'scrape_skye.js', keywords);
 }
 
+async function scrapeMalboroProducts(keywords) {
+    return await scrapeSite('Malboro', 'scrape_malboro.js', keywords);
+}
+
 async function scrapeGanknowProducts(keywords) {
     return await scrapeSite('Ganknow', 'scrape_ganknow.js', keywords);
 }
 
-async function scrapeMalboroProducts(keywords) {
-    return await scrapeSite('Malboro', 'scrape_malboro.js', keywords);
+async function scrapeMercariProducts(keywords) {
+    return await scrapeSite('Mercari', 'scrape_mercari.js', keywords);
+}
+
+async function scrapeEpicnpcProducts(keywords) {
+    return await scrapeSite('EpicNPC', 'scrape_epicnpc.js', keywords);
 }
 
 async function scrapeAllProducts(keywords) {
@@ -137,13 +154,20 @@ async function scrapeAllProducts(keywords) {
     // Start scraping tasks for all sites
     const tasks = [
         scrapeCarousellProducts(keywords),
+        scrapeZaloraProducts(keywords),
+        scrapePgmallProducts(keywords),
         scrapeOhgatchaProducts(keywords),
         scrapeGoodSmileProducts(keywords),
         scrapeAnimateProducts(keywords),
         scrapeHobilityProducts(keywords),
+        scrapeHololiveProducts(keywords),
+        scrapeNijisanjiProducts(keywords),
         scrapeShirotoysProducts(keywords),
         scrapeSkyeProducts(keywords),
-        scrapeMalboroProducts(keywords)
+        scrapeMalboroProducts(keywords),
+        scrapeMercariProducts(keywords),
+        // scrapeGanknowProducts(keywords),
+        // scrapeEpicnpcProducts(keywords),
     ];
 
     // Wait for all scraping tasks to complete
@@ -152,28 +176,31 @@ async function scrapeAllProducts(keywords) {
     // Combine results into a structured object
     const allProducts = {
         Carousell: results[0],
-        Ohgatcha: results[1],
-        GoodSmile: results[2],
-        Animate: results[3],
-        Hobility: results[4],
-        Shirotoys: results[5],
-        Skye: results[6],
-        Malboro: results[7]
+        Zalora: results[1],
+        PGMall: results[2],
+        Ohgatcha: results[3],
+        GoodSmile: results[4],
+        Animate: results[5],
+        Hobility: results[6],
+        Hololive: results[7],
+        Nijisanji: results[8],
+        Shirotoys: results[9],
+        Skye: results[10],
+        Malboro: results[11],
+        Mercari: results[12],
+        // Ganknow: results[13],
+        // EpicNPC: results[14],
     };
 
-    // Print JSON for each site
     Object.keys(allProducts).forEach(site => {
-        logWithTimestamp(`Products from ${site}:`);
-        console.log(JSON.stringify(allProducts[site], null, 2)); // Pretty print JSON
+        const productCount = allProducts[site].length;
+        console.log(`Products from ${site}: ${productCount}/8`);
     });
 
     // Cache the results
     cache[keywords] = allProducts;
-
-    logWithTimestamp(`Completed scraping for keywords: ${keywords}`);
     return allProducts;
 }
-
 
 // ---------- Routes ----------
 app.get('/', (req, res) => res.render('index'));
