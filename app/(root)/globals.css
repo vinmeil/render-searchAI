@@ -12,9 +12,16 @@ body {
   font-family: "Playfair Display", serif;
 }
 
+.bg-primary-2 {
+  background-color: #0b235d;
+}
+.text-primary-2 {
+  color: #0b235d;
+}
+
 @layer base {
   :root {
-    --background: 48.75, 100%, 96.86%;
+    --background: 160, 100%, 99.41%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -22,6 +29,7 @@ body {
     --popover-foreground: 0 0% 3.9%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
+    --primary-2: 189.95, 85.39%, 57.06%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;

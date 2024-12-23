@@ -14,15 +14,19 @@ const Navbar = () => {
   };
 
   return (
-    <div
-      onClick={handleLogoClick}
-      className="w-full flex justify-between items-center px-5 bg-background border-b border-border py-4"
-    >
-      <div className="font-playfair cursor-pointer">searchAI (placeholder)</div>
-      <div className="flex justify-between items-center gap-6">
+    <div className="w-full flex justify-between items-center px-5 bg-background border-b border-border py-4">
+      <div onClick={handleLogoClick} className="font-playfair cursor-pointer">
+        searchAI (placeholder)
+      </div>
+      <div className="flex justify-between items-center gap-12">
         {/* TODO: Log in and pricing page */}
-        <Link href="/pricing">Pricing</Link>
-        <Button>Log In</Button>
+        <Link href="/pricing" className="relative group">
+          <span className="hover:text-primary transition-all duration-300">
+            Pricing
+          </span>
+          <span className="absolute left-0 bottom-0 w-full h-[2px] bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+        </Link>
+        <Button className="bg-primary-2">Log In</Button>
       </div>
     </div>
   );
