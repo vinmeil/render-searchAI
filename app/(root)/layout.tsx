@@ -7,13 +7,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <div className={`relative`}>
-        <div className="fixed top-0 w-full z-10">
-          <Navbar />
-        </div>
-        <div className="md:mt-20 z-1">{children}</div>
+    <div className={`relative`}>
+      <div className="fixed top-0 w-full z-10">
+        <Navbar />
       </div>
-    </Suspense>
+      <Suspense fallback={null}>
+        <div className="md:mt-20 z-1">{children}</div>
+      </Suspense>
+    </div>
   );
 }
