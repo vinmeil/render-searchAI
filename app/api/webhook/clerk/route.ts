@@ -64,6 +64,8 @@ export async function POST(req: Request) {
       email: email_addresses[0].email_address,
       username: username!,
       tier: 0,
+      premiumStartDate: undefined,
+      premiumEndDate: undefined,
       photo: image_url,
     };
 

@@ -11,23 +11,7 @@ import { createUser } from "@/lib/actions/user.actions";
 const Navbar = () => {
   const router = useRouter();
 
-  // const handleLogoClick = () => {
-  //   router.push("/");
-  //   router.refresh();
-  // };
-
-  const handleLogoClick = async () => {
-    const user = await createUser({
-      clerkId: "ckq1j5z",
-      email: "safsfa",
-      username: "pls",
-      tier: 0,
-      premiumStartDate: new Date(),
-      premiumEndDate: new Date(),
-      photo: "photo link",
-    });
-
-    console.log(user);
+  const handleLogoClick = () => {
     router.push("/");
     router.refresh();
   };

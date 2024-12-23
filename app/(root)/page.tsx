@@ -5,25 +5,15 @@ import PromptInput from "@/components/PromptInput";
 import Chat from "@/components/Chat";
 
 import { placeholderRecommendations } from "@/constants";
-import { Product, ChatResponse } from "@/types";
+import { Product } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getProducts } from "@/backend/app.js";
 
 export default function Home() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<boolean>(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [userChats, setUserChats] = useState<string[]>([
-    // "blue shirt",
-    // "shirt",
-    // "green shirt",
-  ]);
-  const [responses, setResponses] = useState<Product[][]>([
-    // placeholderRecommendations,
-    // placeholderRecommendations,
-    // placeholderRecommendations,
-  ]);
+  const [userChats, setUserChats] = useState<string[]>([]);
+  const [responses, setResponses] = useState<Product[][]>([]);
 
   const [query, setQuery] = useState<string>("");
 
@@ -35,7 +25,6 @@ export default function Home() {
     // go back to landing page if no query
     if (!newQuery && !query) {
       setLoading(false);
-      setResults([]);
       setResponses([]);
       setUserChats([]);
       console.log("No query, returning...");
@@ -60,7 +49,6 @@ export default function Home() {
           }
 
           const data = await res.json();
-          setResults([...results, data]);
           setResponses([...responses, data]);
           setQuery("");
           setLoading(false);
@@ -76,13 +64,16 @@ export default function Home() {
       top: window.innerHeight,
       behavior: "smooth",
     });
-  }, [query, searchParams]);
+  }, [query]);
 
   useEffect(() => {
     const newQuery = searchParams.get("query");
+    console.log("Inside 2nd useEffect, newQuery:", newQuery);
 
     if (!newQuery) {
       setQuery("");
+      setUserChats([]);
+      setResponses([]);
     }
   }, [searchParams]);
 
