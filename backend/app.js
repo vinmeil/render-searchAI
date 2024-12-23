@@ -1,146 +1,35 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const { exec } = require("child_process");
 const path = require("path");
+const { exec } = require("child_process");
+const { performance } = require("perf_hooks"); // Import performance module
 const { ChatOllama } = require("@langchain/ollama");
 const { ChatPromptTemplate } = require("@langchain/core/prompts");
 
+// Initialize Express App
 const app = express();
-const cache = {};
+const cache = {}; // Cache for storing product results
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "static"))); // Static files (CSS/JS)
+app.set("view engine", "ejs"); // Set EJS as template engine
+app.set("views", path.join(__dirname, "templates")); // Point views to 'templates'
 
-// Helper function to run Puppeteer scripts
-function runPuppeteerScript(script, keywords) {
-  return new Promise((resolve, reject) => {
-    const curDir = __dirname;
-    const basePath = curDir.split(".next")[0]; // TODO: This might break when deployed
-    const scriptPath = path.join(basePath, `backend/${script}`);
-    console.log("Script path:", scriptPath);
-    exec(`node ${scriptPath} "${keywords}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error running ${script}:`, stderr);
-        resolve([]);
-        return;
-      }
-      try {
-        resolve(JSON.parse(stdout));
-      } catch (err) {
-        console.error("JSONDecodeError:", err);
-        console.error("Output was:", stdout);
-        resolve([]);
-      }
-    });
-  });
+// ---------- Utility for Timestamps ----------
+function logWithTimestamp(message) {
+  console.log(`[${new Date().toISOString()}] ${message}`);
 }
 
-// Scraping functions
-async function scrapeCarousellProducts(keywords) {
-  console.log("Scraping Carousell...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_carousell.js",
-    keywords
-  );
-}
+// ---------- Ollama Keyword Extractor ----------
+const llm = new ChatOllama({
+  model: "llama3.1:latest", // Ensure exact model name
+  temperature: 0.0,
+  basePath: "http://127.0.0.1:11434", // Force IPv4 instead of localhost (::1)
+});
 
-async function scrapeZaloraProducts(keywords) {
-  console.log("Scraping Zalora...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_zalora.js",
-    keywords
-  );
-}
-
-async function scrapePgmallProducts(keywords) {
-  console.log("Scraping PGMall...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_pgmall.js",
-    keywords
-  );
-}
-
-async function scrapeOhgatchaProducts(keywords) {
-  console.log("Scraping Ohgatcha...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_ohgatcha.js",
-    keywords
-  );
-}
-
-async function scrapeGoodsmileProducts(keywords) {
-  console.log("Scraping Goodsmile...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_goodsmile.js",
-    keywords
-  );
-}
-
-async function scrapeHololiveProducts(keywords) {
-  console.log("Scraping Hololive...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_hololive.js",
-    keywords
-  );
-}
-
-async function scrapeNijisanjiProducts(keywords) {
-  console.log("Scraping Nijisanji...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_nijisanji.js",
-    keywords
-  );
-}
-
-async function scrapeMercariProducts(keywords) {
-  console.log("Scraping Mercari...");
-  return await runPuppeteerScript(
-    "puppeteer_scripts/scrape_mercari.js",
-    keywords
-  );
-}
-
-async function scrapeAllProducts(keywords) {
-  console.log("Keywords inside function:", keywords);
-  if (cache[keywords]) {
-    console.log(`Fetching cached results for: ${keywords}`);
-    return cache[keywords];
-  }
-
-  const tasks = [
-    scrapeCarousellProducts(keywords),
-    scrapeZaloraProducts(keywords),
-    scrapePgmallProducts(keywords),
-    scrapeOhgatchaProducts(keywords),
-    scrapeGoodsmileProducts(keywords),
-    scrapeHololiveProducts(keywords),
-    scrapeNijisanjiProducts(keywords),
-    scrapeMercariProducts(keywords),
-  ];
-
-  const results = await Promise.all(tasks);
-
-  const allProducts = {
-    Carousell: results[0],
-    Zalora: results[1],
-    PGMall: results[2],
-    Ohgatcha: results[3],
-    GoodSmile: results[4],
-    Hololive: results[5],
-    Nijisanji: results[6],
-    Mercari: results[7],
-  };
-
-  cache[keywords] = allProducts;
-  return allProducts;
-}
-
-// Keyword extractor using LangChain-based model
 async function keywordExtractor(query) {
-  const llm = new ChatOllama({ model: "llama3.1", temperature: 0.0 });
   const prompt = ChatPromptTemplate.fromMessages([
     {
       role: "system",
@@ -160,7 +49,162 @@ async function keywordExtractor(query) {
 
   const chain = prompt.pipe(llm);
   const result = await chain.invoke({ query });
-  return result.content;
+  return result.content.trim();
+}
+
+// ---------- Helper Function for Puppeteer Scripts ----------
+function runPuppeteerScript(script, keywords) {
+  return new Promise((resolve, reject) => {
+    exec(
+      `node puppeteer_scripts/${script} "${keywords}"`,
+      (error, stdout, stderr) => {
+        if (error) {
+          logWithTimestamp(`Error running ${script}: ${stderr}`);
+          resolve([]); // Return empty array on error
+          return;
+        }
+        try {
+          resolve(JSON.parse(stdout)); // Parse JSON output
+        } catch (err) {
+          logWithTimestamp(`JSONDecodeError: ${err}`);
+          logWithTimestamp(`Output was: ${stdout}`);
+          resolve([]); // Return empty array if JSON fails
+        }
+      }
+    );
+  });
+}
+
+// ---------- Scraping Functions ----------
+async function scrapeSite(siteName, script, keywords) {
+  const start = performance.now(); // Start time
+  console.log(`Scraping ${siteName}...`);
+  const result = await runPuppeteerScript(script, keywords);
+  const end = performance.now(); // End time
+  console.log(
+    `Finished scraping ${siteName} in ${(end - start).toFixed(2)} ms`
+  );
+  return result;
+}
+
+async function scrapeCarousellProducts(keywords) {
+  return await scrapeSite("Carousell", "scrape_carousell.js", keywords);
+}
+
+async function scrapeZaloraProducts(keywords) {
+  return await scrapeSite("Zalora", "scrape_zalora.js", keywords);
+}
+
+async function scrapePgmallProducts(keywords) {
+  return await scrapeSite("PGMall", "scrape_pgmall.js", keywords);
+}
+
+async function scrapeOhgatchaProducts(keywords) {
+  return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
+}
+
+async function scrapeGoodSmileProducts(keywords) {
+  return await scrapeSite("Goodsmile", "scrape_goodsmile.js", keywords);
+}
+
+async function scrapeAnimateProducts(keywords) {
+  return await scrapeSite("Animate", "scrape_animate.js", keywords);
+}
+
+async function scrapeHobilityProducts(keywords) {
+  return await scrapeSite("Hobility", "scrape_hobility.js", keywords);
+}
+
+async function scrapeHololiveProducts(keywords) {
+  return await scrapeSite("Hololive", "scrape_hololive.js", keywords);
+}
+
+async function scrapeNijisanjiProducts(keywords) {
+  return await scrapeSite("Nijisanji", "scrape_nijisanji.js", keywords);
+}
+
+async function scrapeShirotoysProducts(keywords) {
+  return await scrapeSite("Shirotoys", "scrape_shirotoys.js", keywords);
+}
+
+async function scrapeSkyeProducts(keywords) {
+  return await scrapeSite("Skye", "scrape_skye.js", keywords);
+}
+
+async function scrapeMalboroProducts(keywords) {
+  return await scrapeSite("Malboro", "scrape_malboro.js", keywords);
+}
+
+async function scrapeGanknowProducts(keywords) {
+  return await scrapeSite("Ganknow", "scrape_ganknow.js", keywords);
+}
+
+async function scrapeMercariProducts(keywords) {
+  return await scrapeSite("Mercari", "scrape_mercari.js", keywords);
+}
+
+async function scrapeEpicnpcProducts(keywords) {
+  return await scrapeSite("EpicNPC", "scrape_epicnpc.js", keywords);
+}
+
+async function scrapeAllProducts(keywords) {
+  logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
+
+  // Check cache first
+  if (cache[keywords]) {
+    logWithTimestamp(`Fetching cached results for: ${keywords}`);
+    return cache[keywords];
+  }
+
+  // Start scraping tasks for all sites
+  const tasks = [
+    scrapeCarousellProducts(keywords),
+    scrapeZaloraProducts(keywords),
+    scrapePgmallProducts(keywords),
+    scrapeOhgatchaProducts(keywords),
+    scrapeGoodSmileProducts(keywords),
+    scrapeAnimateProducts(keywords),
+    scrapeHobilityProducts(keywords),
+    scrapeHololiveProducts(keywords),
+    scrapeNijisanjiProducts(keywords),
+    scrapeShirotoysProducts(keywords),
+    scrapeSkyeProducts(keywords),
+    scrapeMalboroProducts(keywords),
+    scrapeMercariProducts(keywords),
+    // scrapeGanknowProducts(keywords),
+    // scrapeEpicnpcProducts(keywords),
+  ];
+
+  // Wait for all scraping tasks to complete
+  const results = await Promise.all(tasks);
+
+  // Combine results into a structured object
+  const allProducts = {
+    Carousell: results[0],
+    Zalora: results[1],
+    PGMall: results[2],
+    Ohgatcha: results[3],
+    GoodSmile: results[4],
+    Animate: results[5],
+    Hobility: results[6],
+    Hololive: results[7],
+    Nijisanji: results[8],
+    Shirotoys: results[9],
+    Skye: results[10],
+    Malboro: results[11],
+    Mercari: results[12],
+    // Ganknow: results[13],
+    // EpicNPC: results[14],
+  };
+
+  Object.keys(allProducts).forEach((site) => {
+    const productCount = allProducts[site].length;
+    console.log(`Products from ${site}: ${productCount}/8`);
+  });
+
+  // Cache the results
+  cache[keywords] = allProducts;
+  return allProducts;
 }
 
 export async function getProducts(query) {
@@ -174,8 +218,21 @@ export async function getProducts(query) {
   return products;
 }
 
-// Start server
-// const PORT = process.env.PORT || 5173;
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
+// ---------- Routes ----------
+// app.get('/', (req, res) => res.render('index'));
+
+// app.post('/search', async (req, res) => {
+//     const query = req.body.query;
+//     logWithTimestamp(`Query received: ${query}`);
+
+//     const keywords = await keywordExtractor(query);
+//     logWithTimestamp(`Extracted keywords: ${keywords}`);
+
+//     const products = await scrapeAllProducts(keywords);
+//     res.render('products', { products });
+//     logWithTimestamp(`Rendering products for keywords: ${keywords}`);
 // });
+
+// // ---------- Start Server ----------
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => logWithTimestamp(`Server running on http://localhost:${PORT}`));
