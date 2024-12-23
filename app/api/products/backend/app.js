@@ -71,7 +71,7 @@ function runPuppeteerScript(script, keywords) {
     // Require the module
     // const script = require(scriptPath);
 
-    exec(`node backend/${script} "${keywords}"`, (error, stdout, stderr) => {
+    exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
       // exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
       if (error) {
         logWithTimestamp(`Error running ${script}: ${stderr}`);
