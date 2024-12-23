@@ -15,6 +15,8 @@ export type CreateUserParams = {
   email: string;
   username: string;
   tier: number;
+  premiumStartDate?: Date;
+  premiumEndDate?: Date;
   photo: string;
 };
 
