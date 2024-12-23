@@ -18,7 +18,8 @@ async function scrapeAnimate(keywords) {
 
                 // Extract price
                 const priceElement = product.querySelector(".money");
-                const price = priceElement ? priceElement.innerText.trim() : "N/A";
+                let price = priceElement ? priceElement.innerText.trim() : "N/A";
+                price = price.replace(' MYR', '');
 
                 // Extract image link
                 const imgElement = product.querySelector(".product-item__image-wrapper img");

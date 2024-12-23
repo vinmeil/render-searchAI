@@ -26,7 +26,7 @@ async function scrapeOhgatcha(keywords) {
 
                 all_products.push({
                     name: name,
-                    price: "N/A", // Placeholder for price
+                    price: "SOLD OUT",
                     img_link: imgLink,
                     product_link: productLink
                 });
