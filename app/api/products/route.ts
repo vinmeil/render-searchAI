@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts } from "@/backend/app";
+import { getProducts } from "./backend/app";
 
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
