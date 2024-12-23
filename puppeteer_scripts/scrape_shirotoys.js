@@ -38,7 +38,9 @@ async function scrapeShirotoys(keywords) {
                 });
             }
         });
-        return allProducts;
+
+        // TODO: Dont include this in the final version
+        return allProducts.filter(product => product.name !== "N/A" && product.price !== "N/A" && product.img_link !== "N/A" && product.product_link !== "N/A");
     });
 
     await browser.close();
