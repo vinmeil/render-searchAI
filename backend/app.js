@@ -62,23 +62,30 @@ function runPuppeteerScript(script, keywords) {
     //   `backend/puppeteer_scripts/${script}`
     // );
     // console.log("Script path:", __dirname, script);
-    exec(
-      `node backend/puppeteer_scripts/${script} "${keywords}"`,
-      (error, stdout, stderr) => {
-        if (error) {
-          logWithTimestamp(`Error running ${script}: ${stderr}`);
-          resolve([]); // Return empty array on error
-          return;
-        }
-        try {
-          resolve(JSON.parse(stdout)); // Parse JSON output
-        } catch (err) {
-          logWithTimestamp(`JSONDecodeError: ${err}`);
-          logWithTimestamp(`Output was: ${stdout}`);
-          resolve([]); // Return empty array if JSON fails
-        }
+
+    const path = require("path");
+
+    // Use dirname to get the current directory
+    const scriptPath = path.join(__dirname, "backend", script);
+
+    // Require the module
+    // const script = require(scriptPath);
+
+    exec(`node ${scriptPath} "${keywords}"`, (error, stdout, stderr) => {
+      // exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
+      if (error) {
+        logWithTimestamp(`Error running ${script}: ${stderr}`);
+        resolve([]); // Return empty array on error
+        return;
       }
-    );
+      try {
+        resolve(JSON.parse(stdout)); // Parse JSON output
+      } catch (err) {
+        logWithTimestamp(`JSONDecodeError: ${err}`);
+        logWithTimestamp(`Output was: ${stdout}`);
+        resolve([]); // Return empty array if JSON fails
+      }
+    });
   });
 }
 
