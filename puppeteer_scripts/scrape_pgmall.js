@@ -8,10 +8,7 @@ async function scrapePGMall(keywords) {
     const page = await browser.newPage();
     await page.goto(URL, { waitUntil: 'networkidle2' });
 
-    // Scroll the page to trigger lazy loading
     await autoScroll(page);
-
-    await page.waitForSelector(".category_product_col_new");
 
     const products = await page.evaluate(() => {
         const productElements = document.querySelectorAll(".category_product_col_new");
