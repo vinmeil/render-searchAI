@@ -72,7 +72,7 @@ function runPuppeteerScript(script, keywords) {
     // const script = require(scriptPath);
 
     exec(
-      `node api/products/${script} "${keywords}"`,
+      `node app/api/products/${script} "${keywords}"`,
       (error, stdout, stderr) => {
         // exec(`node ./${script} "${keywords}"`, (error, stdout, stderr) => {
         if (error) {
