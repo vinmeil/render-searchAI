@@ -8,3 +8,17 @@ export type Product = {
 export type ChatResponse = {
   products?: Product[];
 };
+
+// user params
+export type CreateUserParams = {
+  clerkId: string;
+  email: string;
+  username: string;
+  tier: number;
+  photo: string;
+};
+
+export type UpdateUserParams = {
+  username: string;
+  photo: string;
+};
