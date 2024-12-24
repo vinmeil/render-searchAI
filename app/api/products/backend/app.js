@@ -92,14 +92,14 @@ async function scrapeSite(siteName, script, keywords) {
   return result;
 }
 
-const { scrapeCarousell } = require(path.resolve(
-  __dirname,
-  "./backend/scrape_carousell.js"
-));
-async function scrapeCarousellProducts(keywords) {
-  // return await scrapeSite("/Carousell", "scrape_carousell.js", keywords);
-  return await scrapeCarousell(keywords);
-}
+// const { scrapeCarousell } = require(path.resolve(
+//   __dirname,
+//   "./backend/scrape_carousell.js"
+// ));
+// async function scrapeCarousellProducts(keywords) {
+//   // return await scrapeSite("/Carousell", "scrape_carousell.js", keywords);
+//   return await scrapeCarousell(keywords);
+// }
 
 const { scrapeZalora } = require(path.resolve(
   __dirname,
@@ -110,14 +110,14 @@ async function scrapeZaloraProducts(keywords) {
   return await scrapeZalora(keywords);
 }
 
-const { scrapePGMall } = require(path.resolve(
-  __dirname,
-  "./backend/scrape_pgmall.js"
-));
-async function scrapePgmallProducts(keywords) {
-  // return await scrapeSite("PGMall", "scrape_pgmall.js", keywords);
-  return await scrapePGMall(keywords);
-}
+// const { scrapePGMall } = require(path.resolve(
+//   __dirname,
+//   "./backend/scrape_pgmall.js"
+// ));
+// async function scrapePgmallProducts(keywords) {
+//   // return await scrapeSite("PGMall", "scrape_pgmall.js", keywords);
+//   return await scrapePGMall(keywords);
+// }
 
 async function scrapeOhgatchaProducts(keywords) {
   return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
