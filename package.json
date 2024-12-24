@@ -28,11 +28,7 @@
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.2",
     "next": "15.1.2",
-<<<<<<< HEAD
     "puppeteer": "^13.0.0",
-=======
-    "puppeteer": "^23.11.1",
->>>>>>> 81ee0429439b23421a6b25d930ec898f607bba78
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "^19.0.0",
