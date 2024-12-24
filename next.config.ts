@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
                 ".next/server/app/api/products/backend"
               ),
             },
+            {
+              from: path.resolve(
+                __dirname,
+                "node_modules/puppeteer-extra-plugin-stealth/evasions"
+              ),
+              to: path.resolve(
+                __dirname,
+                ".next/server/node_modules/puppeteer-extra-plugin-stealth/evasions"
+              ),
+            },
           ],
         })
       );
