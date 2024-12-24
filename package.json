@@ -1,6 +1,9 @@
 {
   "name": "next-search-ai",
   "type": "module",
+  "engines": {
+    "node": "^18"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {
