@@ -11,6 +11,57 @@ import {
 import { Button } from "@/components/ui/button";
 
 const Pricing = () => {
+  // Function to handle the Monthly Premium button click
+  const onMonthlyButtonClick = async () => {
+    try {
+      const response = await fetch("/api/monthly-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan: "monthly",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process the monthly payment.");
+      }
+
+      const data = await response.json();
+      console.log("Monthly payment response:", data);
+      // Handle success (e.g., redirect to a confirmation page)
+    } catch (error) {
+      console.error("Error during monthly payment:", error);
+    }
+  };
+
+  // Function to handle the Yearly Premium button click
+  const onYearlyButtonClick = async () => {
+    try {
+      const response = await fetch("/api/yearly-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          plan: "yearly",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process the yearly payment.");
+      }
+
+      const data = await response.json();
+      console.log("Yearly payment response:", data);
+      // Handle success (e.g., redirect to a confirmation page)
+    } catch (error) {
+      console.error("Error during yearly payment:", error);
+    }
+  };
+
+// const Pricing = () => {
   // TODO: add content and logic for pricing page
   return (
     <div className="w-screen h-screen flex justify-center">
