@@ -2,7 +2,9 @@ const puppeteer = require("puppeteer");
 
 async function scrapeZalora(keywords) {
   const URL = `https://www.zalora.com.my/search?q=${keywords}`;
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // FIXME: dangerous. remove in future maybe
+  });
   const page = await browser.newPage();
   await page.goto(URL, { waitUntil: "networkidle2" });
 
