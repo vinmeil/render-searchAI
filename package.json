@@ -46,5 +46,8 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "pkg": {
+    "assets": "node_modules/puppeteer-extra-plugin-stealth/**/*.*"
   }
 }
