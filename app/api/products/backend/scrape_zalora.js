@@ -1,9 +1,15 @@
-const puppeteer = require("puppeteer");
+const chromium = require("@sparticuz/chromium-min");
+const puppeteer = require("puppeteer-core");
+
+const chromiumPack =
+  "https://github.com/Sparticuz/chromium/releases/download/v121.0.0/chromium-v121.0.0-pack.tar";
 
 async function scrapeZalora(keywords) {
   const URL = `https://www.zalora.com.my/search?q=${keywords}`;
   const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // FIXME: dangerous. remove in future maybe
+    args: chromium.args,
+    executablePath: await chromium.executablePath(chromiumPack),
+    headless: true,
   });
   const page = await browser.newPage();
   await page.goto(URL, { waitUntil: "networkidle2" });

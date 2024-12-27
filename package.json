@@ -22,6 +22,7 @@
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@sparticuz/chromium-min": "^131.0.1",
     "body-parser": "^1.20.3",
     "chrome-aws-lambda": "^10.1.0",
     "class-variance-authority": "^0.7.1",
