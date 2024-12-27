@@ -179,7 +179,7 @@ async function scrapeAllProducts(keywords) {
   // Start scraping tasks for all sites
   const tasks = [
     // scrapeCarousellProducts(keywords),
-    scrapeZaloraProducts(keywords),
+    // scrapeZaloraProducts(keywords),
     // scrapePgmallProducts(keywords),
     // scrapeOhgatchaProducts(keywords),
     // scrapeGoodSmileProducts(keywords),
@@ -201,7 +201,6 @@ async function scrapeAllProducts(keywords) {
   // Combine results into a structured object
   const allProducts = {
     // Carousell: results[0],
-    Zalora: results[0],
     // PGMall: results[2],
     // Ohgatcha: results[3],
     // GoodSmile: results[4],
