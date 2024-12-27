@@ -6,6 +6,8 @@ const puppeteer = require("puppeteer-core");
 
 async function scrapeZalora(keywords) {
   const URL = `https://www.zalora.com.my/search?q=${keywords}`;
+  console.log("Chromium path: ", await chromium.executablePath());
+
   const browser = await puppeteer.launch({
     args: chromium.args,
     executablePath: await chromium.executablePath(),
