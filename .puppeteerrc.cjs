@@ -4,5 +4,8 @@ const { join } = require("path");
  * @type {import('puppeteer').Configuration}
  */
 module.exports = {
-  cacheDirectory: join(__dirname, ".cache", ".puppeteer"),
+  chrome: {
+    skipDownload: false,
+  },
+  cacheDirectory: join(__dirname, ".cache", "puppeteer"),
 };
