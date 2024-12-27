@@ -26,6 +26,13 @@ const nextConfig: NextConfig = {
                 ".next/server/node_modules/puppeteer-extra-plugin-stealth/evasions"
               ),
             },
+            {
+              from: path.resolve(__dirname, "node_modules/puppeteer"),
+              to: path.resolve(
+                __dirname,
+                ".next/server/node_modules/puppeteer"
+              ),
+            },
           ],
         })
       );
