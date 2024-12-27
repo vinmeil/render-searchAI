@@ -103,7 +103,7 @@ async function scrapeSite(siteName, script, keywords) {
 
 const { scrapeZalora } = require(path.resolve(
   __dirname,
-  "./backend/scrape_zalora.js"
+  "./backend/scrape_zalora.cjs"
 ));
 async function scrapeZaloraProducts(keywords) {
   // return await scrapeSite("Zalora", "scrape_zalora.js", keywords);
