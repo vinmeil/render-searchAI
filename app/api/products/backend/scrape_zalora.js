@@ -3,6 +3,7 @@ const puppeteer = require("puppeteer");
 async function scrapeZalora(keywords) {
   const URL = `https://www.zalora.com.my/search?q=${keywords}`;
   const browser = await puppeteer.launch({
+    headless: false,
     args: ["--no-sandbox", "--disable-setuid-sandbox"], // FIXME: dangerous. remove in future maybe
   });
   const page = await browser.newPage();
