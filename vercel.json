@@ -1,14 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "excludeFiles": "**/__pycache__/**, *.log, *.db, *.sqlite3, *.csv, *.tar.gz, *.zip"
-      }
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
