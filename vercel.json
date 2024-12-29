@@ -7,33 +7,9 @@
       "config": {
         "excludeFiles": "**/__pycache__/**, *.log, *.db, *.sqlite3, *.csv, *.tar.gz, *.zip"
       }
-    },
-    {
-      "src": "backend/scrape_zalora.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "backend/scrape_carousell.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "backend/pgmall.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/scrape_zalora",
-      "dest": "/backend/scrape_zalora.js"
-    },
-    {
-      "src": "/api/scrape_carousell",
-      "dest": "/backend/scrape_carousell.js"
-    },
-    {
-      "src": "/api/scrape_pgmall",
-      "dest": "/backend/scrape_pgmall.js"
-    },
     {
       "src": "/(.*)",
       "dest": "app.js"
