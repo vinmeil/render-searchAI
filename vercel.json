@@ -14,5 +14,10 @@
       "src": "/(.*)",
       "dest": "app.js"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/**/*": {
+      "maxDuration": 60
+    }
+  }
 }

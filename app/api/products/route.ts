@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 60;
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
   console.log("Query inside POST", query);
@@ -7,6 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const res = await fetch(
       "https://searchai-backend-docker.onrender.com/search",
+      // "http://localhost:8080/search",
       {
         method: "POST",
         headers: {
