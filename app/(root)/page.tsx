@@ -22,18 +22,14 @@ export default function Home() {
     console.log("New Query from search params:", newQuery);
     console.log("Page URL Changed, query from state:", query);
 
-    // go back to landing page if no query
     if (!newQuery && !query) {
-      // setLoading(false);
-      // setResponses([]);
-      // setUserChats([]);
       console.log("No query, don't fetch products, returning...");
       return;
     }
 
     const fetchProducts = async () => {
       if (query) {
-        setUserChats([...userChats, query]);
+        setUserChats((prevChats) => [...prevChats, query]);
         try {
           console.log("Query inside fetchProducts", query);
           const res = await fetch("/api/products", {
@@ -50,7 +46,7 @@ export default function Home() {
 
           const data = await res.json();
           console.log("Gotten data:", data);
-          setResponses([...responses, data]);
+          setResponses((prevResponses) => [...prevResponses, data]);
           setQuery("");
           setLoading(false);
           console.log("Data inside function:", data);
