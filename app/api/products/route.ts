@@ -7,8 +7,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const res = await fetch(
-      "https://searchai-backend-docker.onrender.com/search",
-      // "http://localhost:8080/search",
+      process.env.NODE_ENV == "development"
+        ? "http://localhost:8080/search"
+        : "https://searchai-backend-docker.onrender.com/search",
       {
         method: "POST",
         headers: {

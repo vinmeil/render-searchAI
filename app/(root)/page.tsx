@@ -24,10 +24,10 @@ export default function Home() {
 
     // go back to landing page if no query
     if (!newQuery && !query) {
-      setLoading(false);
-      setResponses([]);
-      setUserChats([]);
-      console.log("No query, returning...");
+      // setLoading(false);
+      // setResponses([]);
+      // setUserChats([]);
+      console.log("No query, don't fetch products, returning...");
       return;
     }
 
@@ -49,6 +49,7 @@ export default function Home() {
           }
 
           const data = await res.json();
+          console.log("Gotten data:", data);
           setResponses([...responses, data]);
           setQuery("");
           setLoading(false);
@@ -65,6 +66,11 @@ export default function Home() {
       behavior: "smooth",
     });
   }, [query]);
+
+  useEffect(() => {
+    console.log("User Chats:", userChats);
+    console.log("Responses:", responses);
+  }, [userChats, responses]);
 
   useEffect(() => {
     const newQuery = searchParams.get("query");
