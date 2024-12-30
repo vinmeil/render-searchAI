@@ -29,6 +29,7 @@ export default function Home() {
 
     const fetchProducts = async () => {
       if (query) {
+        console.log("Setting chat query:", query);
         setUserChats((prevChats) => [...prevChats, query]);
         try {
           console.log("Query inside fetchProducts", query);
@@ -39,6 +40,8 @@ export default function Home() {
             },
             body: JSON.stringify({ query }),
           });
+
+          console.log("After fetch, response:", res);
 
           if (!res.ok) {
             throw new Error(`Error: ${res.status} ${res.statusText}`);
