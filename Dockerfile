@@ -1,28 +1,26 @@
-# Use an official Node.js image
+# Use Node.js image
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application source code
+# Copy source code
 COPY . .
 
-# Install TypeScript globally
-RUN npm install -g typescript
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
 
-# Compile TypeScript files to JavaScript
-RUN npx tsc --project tsconfig.json
+# Build the application
+RUN npm run build
 
-# Build the Next.js application
-# RUN npm run build
-
-# Expose port 3000 for Vercel
+# Expose port
 EXPOSE 3000
 
 # Start the application
