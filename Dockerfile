@@ -34,7 +34,7 @@ ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 # Build the Next.js application
-RUN npm run build
+# RUN npm run build
 
 # Expose the port the app will run on
 EXPOSE 8080
