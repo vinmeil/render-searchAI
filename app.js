@@ -88,95 +88,47 @@ async function scrapeSite(siteName, script, keywords) {
   return result;
 }
 
-// Example scraping function (can be extended for more scrapers)
 async function scrapeOhgatchaProducts(keywords) {
   return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
 }
 
-// ---------- Load Data Files ----------
-// Load text files into memory
-const gatchaNames = fs
-  .readFileSync(
-    path.join(path.resolve(), "rag_data/Xgatcha_names.txt"),
-    "utf-8"
-  )
-  .split("\n")
-  .map((name) => name.trim());
-
-const vtuberNames = fs
-  .readFileSync(
-    path.join(path.resolve(), "rag_data/Xvtuber_names.txt"),
-    "utf-8"
-  )
-  .split("\n")
-  .map((name) => name.trim());
-
-const animeNames = fs
-  .readFileSync(
-    path.join(path.resolve(), "rag_data/Xanime_names.txt"),
-    "utf-8"
-  )
-  .split("\n")
-  .map((name) => name.trim());
-
-// ---------- Process Keywords ----------
+// ---------- Scrape All Products ----------
 async function scrapeAllProducts(keywords) {
   logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
-
-  // Check cache first
-  if (cache[keywords]) {
-    logWithTimestamp(`Fetching cached results for: ${keywords}`);
-    return cache[keywords];
-  }
-
-  // Determine the category based on the keyword
-  console.log("Reading txt files...");
-  let category;
-  const lowerCaseKeywords = keywords.toLowerCase();
-  if (gatchaNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
-    category = "Gatcha";
-  } else if (vtuberNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
-    category = "VTubers";
-  } else if (animeNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
-    category = "Anime";
-  } else {
-    category = "Others";
-  }
-
-  // Start scraping tasks based on the category
-  let tasks = [
-    scrapeOhgatchaProducts(keywords),
-  ];
-
-  const results = await Promise.all(tasks);
-  const allProducts = {
-    Ohgatcha: results[0],
-  };
-
-  Object.keys(allProducts).forEach((site) => {
+  const results = await Promise.all([scrapeOhgatchaProducts(keywords)]);
+  const allProducts = { Ohgatcha: results[0] };
+  Object.keys(allProducts).forEach(site => {
     const productCount = allProducts[site].length;
     console.log(`Products from ${site}: ${productCount}/8`);
   });
-
   cache[keywords] = allProducts;
   return allProducts;
 }
 
 // ---------- Route Integration ----------
-// Use compiled JS output to avoid build errors
-import productRoutes from "./dist/route.js";
-app.use("/api", productRoutes);
+import productRoutes from "./route"; // Import route.ts
+app.use("/api", productRoutes); // Use routes
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
 const PORT = process.env.PORT || 3000;
 
-// Explicitly bind to 0.0.0.0 for local and external access
+// Explicitly bind to 0.0.0.0 for compatibility
 const server = app.listen(PORT, "0.0.0.0", () => {
   logWithTimestamp(`Server running on http://0.0.0.0:${PORT}`);
 });
 
-// Handle errors
+// Health Check Route
+app.get("/api/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
+// Handle Errors
 server.on("error", (err) => {
   console.error("Server error:", err);
   process.exit(1);
 });
+
+// Export scrapeAllProducts properly
+module.exports = {
+  scrapeAllProducts,
+};

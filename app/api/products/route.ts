@@ -1,25 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { scrapeAllProducts, keywordExtractor2 } from "../../../app.js"; // Adjust the import path as needed
+import express, { Request, Response } from "express";
+const router = express.Router();
 
-export const maxDuration = 60;
+// Import the scrapeAllProducts function
+const { scrapeAllProducts } = require("../../../app.js");
 
-export async function POST(req: NextRequest) {
-  const { query } = await req.json();
-  console.log(`Query received: ${query}`);
+// Route to fetch products
+router.get(
+  "/products",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const keywords = req.query.keywords as string;
 
-  const keywords = await keywordExtractor2(query);
-  // keywords = query;
-  console.log(`Extracted keywords: ${keywords}`);
+      if (!keywords) {
+        res.status(400).json({ error: "Missing keywords" });
+        return;
+      }
 
-  try {
-    const products = await scrapeAllProducts(keywords);
-    console.log(`Rendering products for keywords: ${keywords}`);
-    return NextResponse.json(products);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+      const products = await scrapeAllProducts(keywords);
+      res.json(products);
+    } catch (error: any) {
+      console.error("Error fetching products:", error.message || error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   }
-}
+);
