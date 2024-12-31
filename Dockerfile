@@ -11,7 +11,8 @@ COPY . .
 # Ensure the correct environment variables are set
 ENV NODE_ENV=production
 
-RUN mkdir -p /app/.next && chown -R node:node /app/.next
+# Set the correct permissions for the .next directory
+RUN mkdir -p /app/.next && chmod -R 777 /app/.next
 
 # Expose the port the app runs on
 EXPOSE 3000
