@@ -174,94 +174,94 @@ async function scrapeAllProducts(keywords) {
 
   // Start scraping tasks based on the category
   let tasks;
-  if (category === 'Gatcha') {
-      console.log("Category: Gatcha");
-      tasks = [
-          scrapeCarousellProducts(keywords),
-          scrapeSkyeProducts(keywords),
-          scrapeMalboroProducts(keywords),
-      ];
-  } else if (category === 'VTubers') {
-      console.log("Category: VTubers");
-      tasks = [
-          scrapeCarousellProducts(keywords),
-          scrapeOhgatchaProducts(keywords),
-          scrapeGoodSmileProducts(keywords),
-          scrapeAnimateProducts(keywords),
-          scrapeHobilityProducts(keywords),
-          scrapeHololiveProducts(keywords),
-          scrapeNijisanjiProducts(keywords),
-          scrapeShirotoysProducts(keywords),
-      ];
-  } else if (category === 'Anime') {
-      console.log("Category: Anime");
-      tasks = [
-          scrapeCarousellProducts(keywords),
-          scrapeOhgatchaProducts(keywords),
-          scrapeGoodSmileProducts(keywords),
-          scrapeAnimateProducts(keywords),
-          scrapeHobilityProducts(keywords),
-          scrapeShirotoysProducts(keywords),
-          scrapeMercariProducts(keywords),
-      ];
-  } else {  // Clothes or other products
-      console.log("Category: Others");
-      tasks = [
-          scrapeCarousellProducts(keywords),
-          scrapeZaloraProducts(keywords),
-          scrapePgmallProducts(keywords),
-          scrapeMercariProducts(keywords),
-      ];
-  }
-  // tasks = [
-  //     // scrapeCarousellProducts(keywords),
-  //     // scrapeZaloraProducts(keywords),
-  //     // scrapeMercariProducts(keywords),
-  //     // scrapeGoodSmileProducts(keywords),
-  //     // scrapeMalboroProducts(keywords),
-  //     // scrapeSkyeProducts(keywords),
-  //     scrapeOhgatchaProducts(keywords),
-  //     scrapeAnimateProducts(keywords),
-  //     // scrapeHobilityProducts(keywords),
-  //     // scrapeHololiveProducts(keywords),
-  //     // scrapeNijisanjiProducts(keywords),
-  //     // scrapeShirotoysProducts(keywords),
-  //     // scrapePgmallProducts(keywords),
+  // if (category === 'Gatcha') {
+  //     console.log("Category: Gatcha");
+  //     tasks = [
+  //         scrapeCarousellProducts(keywords),
+  //         scrapeSkyeProducts(keywords),
+  //         scrapeMalboroProducts(keywords),
+  //     ];
+  // } else if (category === 'VTubers') {
+  //     console.log("Category: VTubers");
+  //     tasks = [
+  //         scrapeCarousellProducts(keywords),
+  //         scrapeOhgatchaProducts(keywords),
+  //         scrapeGoodSmileProducts(keywords),
+  //         scrapeAnimateProducts(keywords),
+  //         scrapeHobilityProducts(keywords),
+  //         scrapeHololiveProducts(keywords),
+  //         scrapeNijisanjiProducts(keywords),
+  //         scrapeShirotoysProducts(keywords),
+  //     ];
+  // } else if (category === 'Anime') {
+  //     console.log("Category: Anime");
+  //     tasks = [
+  //         scrapeCarousellProducts(keywords),
+  //         scrapeOhgatchaProducts(keywords),
+  //         scrapeGoodSmileProducts(keywords),
+  //         scrapeAnimateProducts(keywords),
+  //         scrapeHobilityProducts(keywords),
+  //         scrapeShirotoysProducts(keywords),
+  //         scrapeMercariProducts(keywords),
+  //     ];
+  // } else {  // Clothes or other products
+  //     console.log("Category: Others");
+  //     tasks = [
+  //         scrapeCarousellProducts(keywords),
+  //         scrapeZaloraProducts(keywords),
+  //         scrapePgmallProducts(keywords),
+  //         scrapeMercariProducts(keywords),
+  //     ];
+  // }
+  tasks = [
+      // scrapeCarousellProducts(keywords),
+      // scrapeZaloraProducts(keywords),
+      // scrapeMercariProducts(keywords),
+      // scrapeGoodSmileProducts(keywords),
+      // scrapeMalboroProducts(keywords),
+      // scrapeSkyeProducts(keywords),
+      scrapeOhgatchaProducts(keywords),
+      // scrapeAnimateProducts(keywords),
+      // scrapeHobilityProducts(keywords),
+      // scrapeHololiveProducts(keywords),
+      // scrapeNijisanjiProducts(keywords),
+      // scrapeShirotoysProducts(keywords),
+      // scrapePgmallProducts(keywords),
 
-  // ];
+  ];
 
   // Wait for all scraping tasks to complete
   const results = await Promise.all(tasks);
 
   // Combine results into a structured object
   const allProducts = {};
-  if (category === 'Gatcha') {
-      allProducts.Carousell = results[0];
-      allProducts.Skye = results[1];
-      allProducts.Malboro = results[2];
-  } else if (category === 'VTubers') {
-      allProducts.Carousell = results[0];
-      allProducts.Ohgatcha = results[1];
-      allProducts.GoodSmile = results[2];
-      allProducts.Animate = results[3];
-      allProducts.Hobility = results[4];
-      allProducts.Hololive = results[5];
-      allProducts.Nijisanji = results[6];
-      allProducts.Shirotoys = results[7];
-  } else if (category === 'Anime') { // TODO: Check if Hololive and Nijisanji are Vtuber and Anime, or just Vtuber
-      allProducts.Carousell = results[0];
-      allProducts.Ohgatcha = results[1];
-      allProducts.GoodSmile = results[2];
-      allProducts.Animate = results[3];
-      allProducts.Hobility = results[4]; // TODO: only VTuber?
-      allProducts.Shirotoys = results[5];
-      allProducts.Mercari = results[6];
-  } else {  // Clothes or other products
-      allProducts.Carousell = results[0];
-      allProducts.Zalora = results[1];
-      allProducts.PGMall = results[2];
-      allProducts.Mercari = results[3];
-  }
+  // if (category === 'Gatcha') {
+  //     allProducts.Carousell = results[0];
+  //     allProducts.Skye = results[1];
+  //     allProducts.Malboro = results[2];
+  // } else if (category === 'VTubers') {
+  //     allProducts.Carousell = results[0];
+  //     allProducts.Ohgatcha = results[1];
+  //     allProducts.GoodSmile = results[2];
+  //     allProducts.Animate = results[3];
+  //     allProducts.Hobility = results[4];
+  //     allProducts.Hololive = results[5];
+  //     allProducts.Nijisanji = results[6];
+  //     allProducts.Shirotoys = results[7];
+  // } else if (category === 'Anime') { // TODO: Check if Hololive and Nijisanji are Vtuber and Anime, or just Vtuber
+  //     allProducts.Carousell = results[0];
+  //     allProducts.Ohgatcha = results[1];
+  //     allProducts.GoodSmile = results[2];
+  //     allProducts.Animate = results[3];
+  //     allProducts.Hobility = results[4]; // TODO: only VTuber?
+  //     allProducts.Shirotoys = results[5];
+  //     allProducts.Mercari = results[6];
+  // } else {  // Clothes or other products
+  //     allProducts.Carousell = results[0];
+  //     allProducts.Zalora = results[1];
+  //     allProducts.PGMall = results[2];
+  //     allProducts.Mercari = results[3];
+  // }
       // Ganknow: results[13],
       // EpicNPC: results[14],
 
@@ -271,7 +271,7 @@ async function scrapeAllProducts(keywords) {
       // allProducts.GoodSmile = results[0];
       // allProducts.Malboro = results[0];
       // allProducts.Skye = results[0];
-      // allProducts.Ohgatcha = results[0];
+      allProducts.Ohgatcha = results[0];
       // allProducts.Animate = results[1];
       // allProducts.Hobility = results[0];
       // allProducts.Hololive = results[0];
