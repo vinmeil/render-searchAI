@@ -168,26 +168,33 @@ import productRoutes from "./dist/route.js";
 app.use("/api", productRoutes);
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
-const DEFAULT_PORT = process.env.PORT || 8080;
+// ---------- GPT Fix: Dynamic Port Handling ----------
+const DEFAULT_PORT = process.env.PORT || 10000; // Updated to 10000 for Render compatibility
 let PORT = DEFAULT_PORT;
 
-const server = app.listen(PORT, () => {
-  logWithTimestamp(`Server running on http://localhost:${PORT}`);
+// FIX: Explicitly bind to 0.0.0.0 for external access on Render
+const server = app.listen(PORT, "0.0.0.0", () => {
+  logWithTimestamp(`Server running on http://0.0.0.0:${PORT}`);
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
     console.error(`Port ${PORT} is in use. Trying another port...`);
     PORT = 0;
-    const fallbackServer = app.listen(PORT, () => {
+    const fallbackServer = app.listen(PORT, "0.0.0.0", () => {
       console.log(
-        `Fallback server running on http://localhost:${fallbackServer.address().port}`
+        `Fallback server running on http://0.0.0.0:${fallbackServer.address().port}`
       );
     });
   } else {
     console.error("Server error:", err);
     process.exit(1);
   }
+});
+
+// Health Check Route for Render
+app.get("/api/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 // Export scrapeAllProducts for testing
