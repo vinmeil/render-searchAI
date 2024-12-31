@@ -168,31 +168,21 @@ import productRoutes from "./dist/route.js";
 app.use("/api", productRoutes);
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
-// ---------- GPT Fix: Dynamic Port Handling ----------
-const DEFAULT_PORT = process.env.PORT || 10000; // Updated to 10000 for Render compatibility
-let PORT = DEFAULT_PORT;
+// ---------- Vercel Fix: Use Default Port ----------
+const PORT = process.env.PORT || 3000; // Vercel uses port 3000 by default
 
-// FIX: Explicitly bind to 0.0.0.0 for external access on Render
+// Explicitly bind to 0.0.0.0 for compatibility
 const server = app.listen(PORT, "0.0.0.0", () => {
   logWithTimestamp(`Server running on http://0.0.0.0:${PORT}`);
 });
 
+// Remove dynamic port fallback for Vercel compatibility
 server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`Port ${PORT} is in use. Trying another port...`);
-    PORT = 0;
-    const fallbackServer = app.listen(PORT, "0.0.0.0", () => {
-      console.log(
-        `Fallback server running on http://0.0.0.0:${fallbackServer.address().port}`
-      );
-    });
-  } else {
-    console.error("Server error:", err);
-    process.exit(1);
-  }
+  console.error("Server error:", err);
+  process.exit(1);
 });
 
-// Health Check Route for Render
+// Health Check Route for Vercel
 app.get("/api/health", (req, res) => {
   res.status(200).send("OK");
 });
