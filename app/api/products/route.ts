@@ -1,29 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { scrapeAllProducts, keywordExtractor2 } from "../../../app.js"; // Adjust the import path as needed
 
 export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const { query } = await req.json();
-  console.log("Query inside POST", query);
+  console.log(`Query received: ${query}`);
+
+  const keywords = await keywordExtractor2(query);
+  // keywords = query;
+  console.log(`Extracted keywords: ${keywords}`);
 
   try {
-    const res = await fetch(
-      process.env.NODE_ENV == "development"
-        ? "http://localhost:8080/search"
-        : "https://searchai-backend-docker.onrender.com/search",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Error fetching products: ${res.statusText}`);
-    }
-
-    const products = await res.json();
+    const products = await scrapeAllProducts(keywords);
+    console.log(`Rendering products for keywords: ${keywords}`);
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
