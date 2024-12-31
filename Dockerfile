@@ -1,33 +1,27 @@
-# Use an official Node.js image
+# Use Node.js image
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Install TypeScript globally
-RUN npm install -g typescript
-
-# Copy the rest of the application source code
+# Copy source code
 COPY . .
 
-# Compile TypeScript files to JavaScript
-RUN npx tsc --project tsconfig.json
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
 
-# Build the Next.js application
+# Build the application
 RUN npm run build
 
-# Expose the port the app will run on
+# Expose port
 EXPOSE 3000
-
-# Set environment variables
-ENV NODE_ENV production
-ENV PORT 3000
 
 # Start the application
 CMD ["npm", "start"]
