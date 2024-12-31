@@ -23,6 +23,9 @@ RUN chmod -R 755 /app/.next
 # Switch to a non-root user
 USER node
 
+# Set environment variables
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2F1c2FsLWdvb3NlLTQ0LmNsZXJrLmFjY291bnRzLmRldiQ
+
 # Build the application
 RUN npm run build
 
