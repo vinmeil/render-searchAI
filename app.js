@@ -168,24 +168,15 @@ import productRoutes from "./dist/route.js";
 app.use("/api", productRoutes);
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
-// ---------- Vercel Fix: Use Default Port ----------
-const PORT = process.env.PORT || 3000; // Vercel uses port 3000 by default
+const PORT = process.env.PORT || 3000;
 
-// Explicitly bind to 0.0.0.0 for compatibility
+// Explicitly bind to 0.0.0.0 for local and external access
 const server = app.listen(PORT, "0.0.0.0", () => {
   logWithTimestamp(`Server running on http://0.0.0.0:${PORT}`);
 });
 
-// Remove dynamic port fallback for Vercel compatibility
+// Handle errors
 server.on("error", (err) => {
   console.error("Server error:", err);
   process.exit(1);
 });
-
-// Health Check Route for Vercel
-app.get("/api/health", (req, res) => {
-  res.status(200).send("OK");
-});
-
-// Export scrapeAllProducts for testing
-export { scrapeAllProducts };
