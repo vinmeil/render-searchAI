@@ -1,21 +1,33 @@
-FROM ghcr.io/puppeteer/puppeteer:23.10.4
+# Use an official Node.js image
+FROM node:18-alpine
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
+# Set the working directory inside the container
 WORKDIR /app
 
+# Copy the package.json and package-lock.json files
 COPY package*.json ./
-RUN npm ci
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application source code
 COPY . .
 
-# Ensure the correct environment variables are set
-ENV NODE_ENV=production
+# Create and set permissions for the .next directory
+RUN mkdir -p /app/.next && \
+    chown -R node:node /app
 
-# Set the correct permissions for the .next directory
-RUN mkdir -p /.next && chown -R node:node /.next
+# Ensure the .next directory has proper permissions
+RUN chmod -R 755 /app/.next
 
-# Expose the port the app runs on
+# Switch to a non-root user
+USER node
+
+# Build the application
+RUN npm run build
+
+# Expose the port the app will run on
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
