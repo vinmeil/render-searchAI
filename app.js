@@ -88,213 +88,120 @@ async function scrapeSite(siteName, script, keywords) {
   return result;
 }
 
-async function scrapeCarousellProducts(keywords) {
-  return await scrapeSite("Carousell", "scrape_carousell.js", keywords);
-}
-
-async function scrapeZaloraProducts(keywords) {
-  return await scrapeSite("Zalora", "scrape_zalora.js", keywords);
-}
-
 async function scrapeOhgatchaProducts(keywords) {
   return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
 }
 
-async function scrapeGoodSmileProducts(keywords) {
-  return await scrapeSite("GoodSmile", "scrape_goodsmile.js", keywords);
-}
+// ---------- Load Data Files ----------
+const gatchaNames = fs
+  .readFileSync(
+    path.join(path.resolve(), "rag_data/Xgatcha_names.txt"),
+    "utf-8"
+  )
+  .split("\n")
+  .map((name) => name.trim());
 
-async function scrapeAnimateProducts(keywords) {
-  return await scrapeSite("Animate", "scrape_animate.js", keywords);
-}
+const vtuberNames = fs
+  .readFileSync(
+    path.join(path.resolve(), "rag_data/Xvtuber_names.txt"),
+    "utf-8"
+  )
+  .split("\n")
+  .map((name) => name.trim());
 
-async function scrapeHobilityProducts(keywords) {
-  return await scrapeSite("Hobility", "scrape_hobility.js", keywords);
-}
+const animeNames = fs
+  .readFileSync(
+    path.join(path.resolve(), "rag_data/Xanime_names.txt"),
+    "utf-8"
+  )
+  .split("\n")
+  .map((name) => name.trim());
 
-async function scrapeHololiveProducts(keywords) {
-  return await scrapeSite("Hololive", "scrape_hololive.js", keywords);
-}
-
-async function scrapeNijisanjiProducts(keywords) {
-  return await scrapeSite("Nijisanji", "scrape_nijisanji.js", keywords);
-}
-
-async function scrapeShirotoysProducts(keywords) {
-  return await scrapeSite("Shirotoys", "scrape_shirotoys.js", keywords);
-}
-
-async function scrapeSkyeProducts(keywords) {
-  return await scrapeSite("Skye", "scrape_skye.js", keywords);
-}
-
-async function scrapeMalboroProducts(keywords) {
-  return await scrapeSite("Malboro", "scrape_malboro.js", keywords);
-}
-
-async function scrapeMercariProducts(keywords) {
-  return await scrapeSite("Mercari", "scrape_mercari.js", keywords);
-}
-
-async function scrapeEpicnpcProducts(keywords) {
-  return await scrapeSite("EpicNPC", "scrape_epicnpc.js", keywords);
-}
-
-// Load text files into memory
-// const gatchaNames = fs.readFileSync(path.join(__dirname, 'rag_data/Xgatcha_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-// const vtuberNames = fs.readFileSync(path.join(__dirname, 'rag_data/Xvtuber_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-// const animeNames = fs.readFileSync(path.join(__dirname, 'rag_data/Xanime_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-const gatchaNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xgatcha_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-const vtuberNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xvtuber_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-const animeNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xanime_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-
-
+// ---------- Process Keywords ----------
 async function scrapeAllProducts(keywords) {
   logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
-  
+
   // Check cache first
   if (cache[keywords]) {
-      logWithTimestamp(`Fetching cached results for: ${keywords}`);
-      return cache[keywords];
+    logWithTimestamp(`Fetching cached results for: ${keywords}`);
+    return cache[keywords];
   }
 
   // Determine the category based on the keyword
-  console.log('Reading txt files...');
+  console.log("Reading txt files...");
   let category;
   const lowerCaseKeywords = keywords.toLowerCase();
-  if (gatchaNames.some(name => lowerCaseKeywords.includes(name.toLowerCase()))) {
-      category = 'Gatcha';
-  } else if (vtuberNames.some(name => lowerCaseKeywords.includes(name.toLowerCase()))) {
-      category = 'VTubers';
-  } else if (animeNames.some(name => lowerCaseKeywords.includes(name.toLowerCase()))) {
-      category = 'Anime';
+  if (gatchaNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
+    category = "Gatcha";
+  } else if (vtuberNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
+    category = "VTubers";
+  } else if (animeNames.some((name) => lowerCaseKeywords.includes(name.toLowerCase()))) {
+    category = "Anime";
   } else {
-      category = 'Others';
+    category = "Others";
   }
 
   // Start scraping tasks based on the category
   let tasks;
-  // if (category === 'Gatcha') {
-  //     console.log("Category: Gatcha");
-  //     tasks = [
-  //         scrapeCarousellProducts(keywords),
-  //         scrapeSkyeProducts(keywords),
-  //         scrapeMalboroProducts(keywords),
-  //     ];
-  // } else if (category === 'VTubers') {
-  //     console.log("Category: VTubers");
-  //     tasks = [
-  //         scrapeCarousellProducts(keywords),
-  //         scrapeOhgatchaProducts(keywords),
-  //         scrapeGoodSmileProducts(keywords),
-  //         scrapeAnimateProducts(keywords),
-  //         scrapeHobilityProducts(keywords),
-  //         scrapeHololiveProducts(keywords),
-  //         scrapeNijisanjiProducts(keywords),
-  //         scrapeShirotoysProducts(keywords),
-  //     ];
-  // } else if (category === 'Anime') {
-  //     console.log("Category: Anime");
-  //     tasks = [
-  //         scrapeCarousellProducts(keywords),
-  //         scrapeOhgatchaProducts(keywords),
-  //         scrapeGoodSmileProducts(keywords),
-  //         scrapeAnimateProducts(keywords),
-  //         scrapeHobilityProducts(keywords),
-  //         scrapeShirotoysProducts(keywords),
-  //         scrapeMercariProducts(keywords),
-  //     ];
-  // } else {  // Clothes or other products
-  //     console.log("Category: Others");
-  //     tasks = [
-  //         scrapeCarousellProducts(keywords),
-  //         scrapeZaloraProducts(keywords),
-  //         scrapePgmallProducts(keywords),
-  //         scrapeMercariProducts(keywords),
-  //     ];
-  // }
-  tasks = [
-      // scrapeCarousellProducts(keywords),
-      // scrapeZaloraProducts(keywords),
-      // scrapeMercariProducts(keywords),
-      // scrapeGoodSmileProducts(keywords),
-      // scrapeMalboroProducts(keywords),
-      // scrapeSkyeProducts(keywords),
+  if (category === "Gatcha") {
+    tasks = [
       scrapeOhgatchaProducts(keywords),
-      // scrapeAnimateProducts(keywords),
-      // scrapeHobilityProducts(keywords),
-      // scrapeHololiveProducts(keywords),
-      // scrapeNijisanjiProducts(keywords),
-      // scrapeShirotoysProducts(keywords),
-      // scrapePgmallProducts(keywords),
+    ];
+  } else if (category === "VTubers") {
+    tasks = [
+      scrapeOhgatchaProducts(keywords),
+    ];
+  } else if (category === "Anime") {
+    tasks = [
+      scrapeOhgatchaProducts(keywords),
+    ];
+  } else {
+    tasks = [
+      scrapeOhgatchaProducts(keywords),
+    ];
+  }
 
-  ];
-
-  // Wait for all scraping tasks to complete
   const results = await Promise.all(tasks);
+  const allProducts = {
+    Ohgatcha: results[0],
+  };
 
-  // Combine results into a structured object
-  const allProducts = {};
-  // if (category === 'Gatcha') {
-  //     allProducts.Carousell = results[0];
-  //     allProducts.Skye = results[1];
-  //     allProducts.Malboro = results[2];
-  // } else if (category === 'VTubers') {
-  //     allProducts.Carousell = results[0];
-  //     allProducts.Ohgatcha = results[1];
-  //     allProducts.GoodSmile = results[2];
-  //     allProducts.Animate = results[3];
-  //     allProducts.Hobility = results[4];
-  //     allProducts.Hololive = results[5];
-  //     allProducts.Nijisanji = results[6];
-  //     allProducts.Shirotoys = results[7];
-  // } else if (category === 'Anime') { // TODO: Check if Hololive and Nijisanji are Vtuber and Anime, or just Vtuber
-  //     allProducts.Carousell = results[0];
-  //     allProducts.Ohgatcha = results[1];
-  //     allProducts.GoodSmile = results[2];
-  //     allProducts.Animate = results[3];
-  //     allProducts.Hobility = results[4]; // TODO: only VTuber?
-  //     allProducts.Shirotoys = results[5];
-  //     allProducts.Mercari = results[6];
-  // } else {  // Clothes or other products
-  //     allProducts.Carousell = results[0];
-  //     allProducts.Zalora = results[1];
-  //     allProducts.PGMall = results[2];
-  //     allProducts.Mercari = results[3];
-  // }
-      // Ganknow: results[13],
-      // EpicNPC: results[14],
-
-      // allProducts.Carousell = results[0];
-      // allProducts.Zalora = results[0];
-      // allProducts.Mercari = results[1];
-      // allProducts.GoodSmile = results[0];
-      // allProducts.Malboro = results[0];
-      // allProducts.Skye = results[0];
-      allProducts.Ohgatcha = results[0];
-      // allProducts.Animate = results[1];
-      // allProducts.Hobility = results[0];
-      // allProducts.Hololive = results[0];
-      // allProducts.Nijisanji = results[0];
-      // allProducts.Shirotoys = results[0];
-      // allProducts.PGMall = results[0];
-
-  Object.keys(allProducts).forEach(site => {
-      const productCount = allProducts[site].length;
-      console.log(`Products from ${site}: ${productCount}/8`);
+  Object.keys(allProducts).forEach((site) => {
+    const productCount = allProducts[site].length;
+    console.log(`Products from ${site}: ${productCount}/8`);
   });
 
-  // Cache the results
   cache[keywords] = allProducts;
   return allProducts;
 }
 
-// ---------- Routes ----------
+// ---------- Route Integration ----------
+// Importing the compiled JS version to avoid Webpack errors
+import productRoutes from "./route.js";
+app.use("/api", productRoutes);
 
-// ---------- Start Server ----------
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () =>
-  logWithTimestamp(`Server running on http://localhost:${PORT}`)
-);
+// ---------- GPT Fix: Dynamic Port Handling ----------
+const DEFAULT_PORT = process.env.PORT || 8080;
+let PORT = DEFAULT_PORT;
 
+const server = app.listen(PORT, () => {
+  logWithTimestamp(`Server running on http://localhost:${PORT}`);
+});
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is in use. Trying another port...`);
+    PORT = 0;
+    const fallbackServer = app.listen(PORT, () => {
+      console.log(
+        `Fallback server running on http://localhost:${fallbackServer.address().port}`
+      );
+    });
+  } else {
+    console.error("Server error:", err);
+    process.exit(1);
+  }
+});
+
+// Export scrapeAllProducts for testing
 export { scrapeAllProducts };
