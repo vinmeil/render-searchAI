@@ -97,16 +97,12 @@ async function scrapeAllProducts(keywords) {
   logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
   const results = await Promise.all([scrapeOhgatchaProducts(keywords)]);
   const allProducts = { Ohgatcha: results[0] };
-  Object.keys(allProducts).forEach(site => {
-    const productCount = allProducts[site].length;
-    console.log(`Products from ${site}: ${productCount}/8`);
-  });
   cache[keywords] = allProducts;
   return allProducts;
 }
 
 // ---------- Route Integration ----------
-import productRoutes from "./route"; // Import route.ts
+import productRoutes from "./route.js"; // FIXED path issue with extension
 app.use("/api", productRoutes); // Use routes
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
@@ -120,12 +116,6 @@ const server = app.listen(PORT, "0.0.0.0", () => {
 // Health Check Route
 app.get("/api/health", (req, res) => {
   res.status(200).send("OK");
-});
-
-// Handle Errors
-server.on("error", (err) => {
-  console.error("Server error:", err);
-  process.exit(1);
 });
 
 // Export scrapeAllProducts properly
