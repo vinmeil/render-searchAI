@@ -1,36 +1,29 @@
-# Use an official Node.js image
+# Use Node.js base image
 FROM node:18-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
+# Copy package.json and package-lock.json first for dependency caching
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application source code
+# Copy the entire application code to the container
 COPY . .
 
-# Create and set permissions for the .next directory
-RUN mkdir -p /app/.next && \
-    chown -R node:node /app
+# Install TypeScript globally
+RUN npm install -g typescript
 
-# Ensure the .next directory has proper permissions
-RUN chmod -R 755 /app/.next
+# Compile TypeScript to JavaScript
+RUN npx tsc --project tsconfig.json
 
-# Switch to a non-root user
-USER node
-
-# Set environment variables
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2F1c2FsLWdvb3NlLTQ0LmNsZXJrLmFjY291bnRzLmRldiQ
-
-# Build the application
+# Build the Next.js application
 RUN npm run build
 
 # Expose the port the app will run on
-EXPOSE 3000
+EXPOSE 8080
 
-# Start the application
+# Start the server
 CMD ["npm", "start"]

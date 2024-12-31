@@ -88,11 +88,13 @@ async function scrapeSite(siteName, script, keywords) {
   return result;
 }
 
+// Example scraping function (can be extended for more scrapers)
 async function scrapeOhgatchaProducts(keywords) {
   return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
 }
 
 // ---------- Load Data Files ----------
+// Load text files into memory
 const gatchaNames = fs
   .readFileSync(
     path.join(path.resolve(), "rag_data/Xgatcha_names.txt"),
@@ -142,24 +144,9 @@ async function scrapeAllProducts(keywords) {
   }
 
   // Start scraping tasks based on the category
-  let tasks;
-  if (category === "Gatcha") {
-    tasks = [
-      scrapeOhgatchaProducts(keywords),
-    ];
-  } else if (category === "VTubers") {
-    tasks = [
-      scrapeOhgatchaProducts(keywords),
-    ];
-  } else if (category === "Anime") {
-    tasks = [
-      scrapeOhgatchaProducts(keywords),
-    ];
-  } else {
-    tasks = [
-      scrapeOhgatchaProducts(keywords),
-    ];
-  }
+  let tasks = [
+    scrapeOhgatchaProducts(keywords),
+  ];
 
   const results = await Promise.all(tasks);
   const allProducts = {
@@ -176,8 +163,8 @@ async function scrapeAllProducts(keywords) {
 }
 
 // ---------- Route Integration ----------
-// Importing the compiled JS version to avoid Webpack errors
-import productRoutes from "./route.js";
+// Use compiled JS output to avoid build errors
+import productRoutes from "./dist/route.js";
 app.use("/api", productRoutes);
 
 // ---------- GPT Fix: Dynamic Port Handling ----------
