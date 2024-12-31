@@ -289,33 +289,12 @@ async function scrapeAllProducts(keywords) {
   return allProducts;
 }
 
+// ---------- Routes ----------
 
-// ---------- Route Integration ----------
-import productRoutes from "./route"; // Import route.ts
-app.use("/api", productRoutes); // Use routes
+// ---------- Start Server ----------
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () =>
+  logWithTimestamp(`Server running on http://localhost:${PORT}`)
+);
 
-// ---------- GPT Fix: Dynamic Port Handling ----------
-const DEFAULT_PORT = process.env.PORT || 8080;
-let PORT = DEFAULT_PORT;
-
-const server = app.listen(PORT, () => {
-  logWithTimestamp(`Server running on http://localhost:${PORT}`);
-});
-
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`Port ${PORT} is in use. Trying another port...`);
-    PORT = 0; // Automatically assign a free port
-    const fallbackServer = app.listen(PORT, () => {
-      console.log(
-        `Fallback server running on http://localhost:${fallbackServer.address().port}`
-      );
-    });
-  } else {
-    console.error("Server error:", err);
-    process.exit(1); // Exit the process for non-port errors
-  }
-});
-
-// Export scrapeAllProducts for testing
 export { scrapeAllProducts };
