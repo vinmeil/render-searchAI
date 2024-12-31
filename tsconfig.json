@@ -1,14 +1,41 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
-    "outDir": "dist", // Ensures compiled JS files go to 'dist'
-    "rootDir": ".", // Specifies root directory for source files
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "target": "ES2017", // ES2017 compatibility
+    "lib": ["dom", "dom.iterable", "esnext"], // Support modern JavaScript features
+    "allowJs": true, // Allow JavaScript files in the project
+    "skipLibCheck": true, // Skip type checking of declaration files for faster builds
+    "strict": true, // Enable strict type checking
+    "noEmit": false, // FIXED: Emit compiled JS files
+    "esModuleInterop": true, // Allow ES6 module imports
+    "module": "CommonJS", // Use CommonJS module system for compatibility
+    "moduleResolution": "Node", // Resolve modules like Node.js does
+    "resolveJsonModule": true, // Allow importing JSON files
+    "isolatedModules": true, // Required for Next.js
+    "jsx": "preserve", // Preserve JSX for React
+    "incremental": true, // Enable incremental compilation
+    "outDir": "dist", // FIXED: Output compiled JS files in 'dist' directory
+    "rootDir": ".", // Treat current directory as root for compilation
+    "baseUrl": ".", // FIXED: Base URL for path aliases
+    "paths": { // FIXED: Path aliases
+      "@/*": ["./*"], // Support alias '@/'
+      "@/lib/*": ["lib/*"], // Alias for /lib
+      "@/types": ["types"], // Alias for /types
+      "@/utils": ["lib/utils"] // Alias for /lib/utils
+    },
+    "plugins": [
+      {
+        "name": "next" // Next.js plugin for incremental builds
+      }
+    ]
   },
-  "include": ["**/*.ts"], // Include TypeScript files for compilation
-  "exclude": ["node_modules", "dist"] // Exclude compiled output
+  "include": [
+    "next-env.d.ts", // Include Next.js types
+    "**/*.ts", // Include TypeScript files
+    "**/*.tsx", // Include TSX files
+    ".next/types/**/*.ts" // Include Next.js generated types
+  ],
+  "exclude": [
+    "node_modules", // Exclude dependencies
+    "dist" // Exclude compiled output
+  ]
 }
