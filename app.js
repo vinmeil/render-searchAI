@@ -110,28 +110,53 @@ async function scrapeAllProducts(keywords) {
   return allProducts;
 }
 
-// ---------- Dynamic Port Handling ----------
-const DEFAULT_PORT = process.env.PORT || 3000; // Updated default port
-let PORT = DEFAULT_PORT;
+// // ---------- Dynamic Port Handling ----------
+// const DEFAULT_PORT = process.env.PORT || 3000; // Updated default port
+// let PORT = DEFAULT_PORT;
 
-const server = app.listen(PORT, () => {
-  logWithTimestamp(`Server running on http://localhost:${PORT}`);
+// const server = app.listen(PORT, () => {
+//   logWithTimestamp(`Server running on http://localhost:${PORT}`);
+// });
+
+// server.on("error", (err) => {
+//   if (err.code === "EADDRINUSE") {
+//     console.error(`Port ${PORT} is in use. Trying another port...`);
+//     PORT = 0; // Automatically assign a free port
+//     const fallbackServer = app.listen(PORT, () => {
+//       console.log(
+//         `Fallback server running on http://localhost:${fallbackServer.address().port}`
+//       );
+//     });
+//   } else {
+//     console.error("Server error:", err);
+//     process.exit(1); // Exit the process for non-port errors
+//   }
+// });
+
+// // ---------- Export Functions ----------
+// export { scrapeAllProducts, keywordExtractor2 };
+
+// ---------- Routes ----------
+app.post("/search", async (req, res) => {
+  const query = req.body.query;
+  logWithTimestamp(`Query received: ${query}`);
+
+  const keywords = await keywordExtractor2(query);
+  console.log(`Extracted keywords: ${keywords}`);
+
+  const products = await scrapeAllProducts(keywords);
+  logWithTimestamp(`Rendering products for keywords: ${keywords}`);
+  res.json(products);
 });
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`Port ${PORT} is in use. Trying another port...`);
-    PORT = 0; // Automatically assign a free port
-    const fallbackServer = app.listen(PORT, () => {
-      console.log(
-        `Fallback server running on http://localhost:${fallbackServer.address().port}`
-      );
-    });
-  } else {
-    console.error("Server error:", err);
-    process.exit(1); // Exit the process for non-port errors
-  }
+app.get("/test", async (req, res) => {
+  res.send("Hello, world!");
 });
 
-// ---------- Export Functions ----------
+// ---------- Start Server ----------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () =>
+  logWithTimestamp(`Server running on http://localhost:${PORT}`)
+);
+
 export { scrapeAllProducts, keywordExtractor2 };

@@ -48,7 +48,9 @@ async function scrapeOhgatcha(keywords) {
     return products;
 }
 
-const keywords = process.argv[2];
-scrapeOhgatcha(keywords).then((products) => {
-    console.log(JSON.stringify(products));
+const keywords = process.argv[2] || "hololive";
+scrapeOhgatcha(keywords).then(products => {
+  console.log(JSON.stringify(products, null, 2));
+}).catch(err => {
+  console.error("Error:", err);
 });

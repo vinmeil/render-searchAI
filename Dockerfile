@@ -3,7 +3,7 @@ FROM ghcr.io/puppeteer/puppeteer:23.10.4
 
 # Set environment variables
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-# ENV NODE_ENV=production
+ENV NODE_ENV=production
 
 # Set the working directory inside the container
 WORKDIR /app
