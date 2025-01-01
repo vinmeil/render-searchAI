@@ -1,5 +1,9 @@
-# Use an official Node.js image
-FROM node:18-alpine
+# Use the Puppeteer image as the base image
+FROM ghcr.io/puppeteer/puppeteer:23.10.4
+
+# Set environment variables
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# ENV NODE_ENV=production
 
 # Set the working directory inside the container
 WORKDIR /app
