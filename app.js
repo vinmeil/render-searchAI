@@ -87,7 +87,7 @@ async function scrapeSite(siteName, script, keywords) {
 }
 
 async function scrapeOhgatchaProducts(keywords) {
-  return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
+  return await scrapeSite("Ohgatcha", "scrape_goodsmile.js", keywords);
 }
 
 // ---------- Scraping Function ----------
