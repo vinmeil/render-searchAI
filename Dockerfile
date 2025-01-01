@@ -34,10 +34,9 @@ ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 # Build the Next.js application
-# RUN npm run build
+RUN npm run build
 
-# Expose port 10000 for Render compatibility
-EXPOSE 10000
+EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

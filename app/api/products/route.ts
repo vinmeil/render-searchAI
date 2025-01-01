@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scrapeAllProducts, keywordExtractor2 } from "../../../app.js"; // Adjust the import path as needed
+import { scrapeAllProducts, keywordExtractor2 } from "../../../app.js"; // Fixed import path
 
 export const maxDuration = 60;
 
@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
   console.log(`Query received: ${query}`);
 
   const keywords = await keywordExtractor2(query);
-  // keywords = query;
   console.log(`Extracted keywords: ${keywords}`);
 
   try {
