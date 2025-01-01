@@ -1,40 +1,47 @@
-import puppeteer from 'puppeteer-extra';
+import puppeteer from "puppeteer-extra";
 
 async function scrapeOhgatcha(keywords) {
     const URL = `https://ohgatcha.com/search?q=${keywords}`;
-    const browser = await puppeteer.launch({
-        args: ["--disable-setuid-sandbox", "--no-sandbox"],
+    let browser;
+    browser = await puppeteer.launch({
+        args: ["--disable-setuid-sandbox", "--no-sandbox", "--no-zygote"],
+        executablePath:
+            process.env.NODE_ENV === "production"
+                ? process.env.PUPPETEER_EXECUTABLE_PATH
+                : puppeteer.executablePath(),
         headless: true,
     });
-    const page = await browser.newPage();
-    await page.goto(URL, { waitUntil: 'networkidle2' });
 
-    // Scrape products
+    const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(0);
+    await page.goto(URL, { waitUntil: "networkidle2" });
+
+    // Print the HTML content for debugging
+    // const htmlContent = await page.content();
+    // console.log(htmlContent);
+
     const products = await page.evaluate(() => {
         const productElements = document.querySelectorAll(".product-wrap");
         const all_products = [];
         productElements.forEach((product, index) => {
-            if (index < 8) { // Limit to 8 products
+            if (index < 8) {
                 const nameElement = product.querySelector(".hidden-product-link");
                 const imgElement = product.querySelector(".image-element__wrap img");
                 const linkElement = product.querySelector("a");
-                const priceElement = product.querySelector(".price span.money"); // Direct price scraping
 
                 const name = nameElement ? nameElement.innerText.trim() : "N/A";
                 let imgLink = imgElement ? imgElement.src : "N/A";
                 const productLink = linkElement ? linkElement.href : "N/A";
-                const price = priceElement ? priceElement.innerText.trim() : "SOLD OUT";
 
-                // WARNING: Do not remove
                 if (imgElement && imgElement.dataset.src) {
                     imgLink = imgElement.dataset.src;
                 }
 
                 all_products.push({
-                    name: name,
-                    price: price, // Updated price
+                    name,
+                    price: "SOLD OUT",
                     img_link: imgLink,
-                    product_link: productLink
+                    product_link: productLink,
                 });
             }
         });
@@ -45,8 +52,9 @@ async function scrapeOhgatcha(keywords) {
     return products;
 }
 
-// Get keywords and run scraper
-const keywords = process.argv[2];
+const keywords = process.argv[2] || "hololive";
 scrapeOhgatcha(keywords).then(products => {
-    console.log(JSON.stringify(products));
+  console.log(JSON.stringify(products, null, 2));
+}).catch(err => {
+  console.error("Error:", err);
 });
