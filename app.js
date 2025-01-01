@@ -292,9 +292,26 @@ async function scrapeAllProducts(keywords) {
 // ---------- Routes ----------
 
 // ---------- Start Server ----------
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () =>
-  logWithTimestamp(`Server running on http://localhost:${PORT}`)
-);
+const DEFAULT_PORT = process.env.PORT || 8080; // Use 8080 by default or environment PORT
+let PORT = DEFAULT_PORT;
 
-export { scrapeAllProducts };
+// Explicitly bind to 0.0.0.0 for external access
+const server = app.listen(PORT, "0.0.0.0", () => {
+  logWithTimestamp(`Server running on http://0.0.0.0:${PORT}`);
+});
+
+// Handle errors for port conflicts
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use. Trying another port...`);
+    PORT = 0; // Automatically assign a free port
+    const fallbackServer = app.listen(PORT, "0.0.0.0", () => {
+      console.log(
+        `Fallback server running on http://0.0.0.0:${fallbackServer.address().port}`
+      );
+    });
+  } else {
+    console.error("Server error:", err);
+    process.exit(1);
+  }
+});
