@@ -90,21 +90,9 @@ async function scrapeOhgatchaProducts(keywords) {
   return await scrapeSite("Ohgatcha", "scrape_ohgatcha.js", keywords);
 }
 
-// Load text files into memory
-const gatchaNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xgatcha_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-const vtuberNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xvtuber_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-const animeNames = fs.readFileSync(path.join(path.resolve(), 'rag_data/Xanime_names.txt'), 'utf-8').split('\n').map(name => name.trim());
-
 // ---------- Scraping Function ----------
 async function scrapeAllProducts(keywords) {
   logWithTimestamp(`Starting scraping for keywords: ${keywords}`);
-
-  // Check cache first
-  if (cache[keywords]) {
-    logWithTimestamp(`Fetching cached results for: ${keywords}`);
-    return cache[keywords];
-  }
-
   const results = await Promise.all([
     scrapeOhgatchaProducts(keywords),
   ]);
@@ -118,13 +106,12 @@ async function scrapeAllProducts(keywords) {
     console.log(`Products from ${site}: ${productCount}/8`);
   });
 
-  // Cache the results
-  cache[keywords] = allProducts;
+  cache[keywords] = allProducts; // Cache the results
   return allProducts;
 }
 
 // ---------- Dynamic Port Handling ----------
-const DEFAULT_PORT = process.env.PORT || 8080;
+const DEFAULT_PORT = process.env.PORT || 3000; // Updated default port
 let PORT = DEFAULT_PORT;
 
 const server = app.listen(PORT, () => {
@@ -146,5 +133,5 @@ server.on("error", (err) => {
   }
 });
 
-// ---------- Export Functions for TypeScript ----------
+// ---------- Export Functions ----------
 export { scrapeAllProducts, keywordExtractor2 };
