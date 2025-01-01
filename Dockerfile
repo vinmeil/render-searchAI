@@ -26,11 +26,11 @@ USER node
 # Set environment variables
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2F1c2FsLWdvb3NlLTQ0LmNsZXJrLmFjY291bnRzLmRldiQ
 
-# # Build the application
-# RUN npm run build
+# Build the application
+RUN npm run build
 
 # Expose the port the app will run on
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]
