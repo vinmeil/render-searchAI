@@ -31,8 +31,8 @@ RUN mkdir -p /app/.next && \
 # Ensure the entire /app directory has proper permissions
 RUN chmod -R 755 /app
 
-# Switch back to non-root user
-USER pptruser
+# # Switch back to non-root user
+# USER pptruser
 
 # Set environment variables dynamically
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
@@ -43,6 +43,9 @@ RUN npm run build
 
 # Expose the port for container
 EXPOSE 3000
+
+# Switch back to non-root user
+USER pptruser
 
 # Start the application
 CMD ["npm", "start"]
