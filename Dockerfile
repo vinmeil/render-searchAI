@@ -33,4 +33,4 @@ ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y2F1c2FsLWdvb3NlLTQ0LmNsZXJrLmFjY2
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
