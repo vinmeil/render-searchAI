@@ -16,6 +16,10 @@ async function scrapeOhgatcha(keywords) {
     await page.setDefaultNavigationTimeout(0);
     await page.goto(URL, { waitUntil: "networkidle2" });
 
+    // Print the HTML content for debugging
+    const htmlContent = await page.content();
+    console.log(htmlContent);
+
     const products = await page.evaluate(() => {
         const productElements = document.querySelectorAll(".product-wrap");
         const all_products = [];
