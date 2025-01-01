@@ -21,18 +21,18 @@ COPY . .
 USER root
 RUN npm install -g typescript
 
-# Switch back to non-root user
-USER pptruser
-
 # Compile TypeScript files to JavaScript
 RUN npx tsc --project tsconfig.json
 
 # Create and set permissions for the .next directory
 RUN mkdir -p /app/.next && \
-    chown -R pptruser:pptruser /app
+    chmod -R 755 /app/.next
 
-# Ensure the .next directory has proper permissions
-RUN chmod -R 755 /app/.next
+# Ensure the entire /app directory has proper permissions
+RUN chmod -R 755 /app
+
+# Switch back to non-root user
+USER pptruser
 
 # Set environment variables dynamically
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
